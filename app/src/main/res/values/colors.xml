@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Brand (Vibrant Blue for Dark Mode) -->
+    <color name="primary">#5B9DFA</color>      <!-- Lighter Blue for dark bg -->
+    <color name="primary_dark">#2563EB</color>
+    <color name="primary_light">#1E3A5F</color> <!-- Used for card backgrounds -->
+
+    <!-- Secondary (Success Green) -->
+    <color name="secondary">#10B981</color>
+    <color name="secondary_dark">#10B981</color>
+
+    <!-- Neutrals (Dark Backgrounds) -->
+    <color name="background">#121212</color>    <!-- Pure Dark / AMOLED -->
+    <color name="surface">#1E1E1E</color>       <!-- Card Backgrounds -->
+    <color name="surface_variant">#2C2C2C</color> <!-- Slightly lighter surface -->
+
+    <!-- Error -->
+    <color name="error">#CF6679</color>
+
+    <!-- Text (Light for readability) -->
+    <color name="text_primary">#FFFFFF</color>  <!-- White -->
+    <color name="text_secondary">#B0B0B0</color> <!-- Light Grey -->
+    <color name="text_disabled">#666666</color>
+
+    <!-- Basic -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

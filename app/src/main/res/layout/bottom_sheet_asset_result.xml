@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_bottom_sheet_rounded">
+
+    <!-- Success Icon -->
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/checkbox_on_background"
+        android:layout_gravity="center_horizontal"/>
+
+    <TextView
+        android:id="@+id/textResultTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Asset Recognized"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Asset Name -->
+    <TextView
+        android:id="@+id/textResultName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dell XPS 15"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Status Badge -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardResultStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#E8F5E9">
+
+        <TextView
+            android:id="@+id/textResultStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            android:text="Active"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"/>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Details Grid -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
+        android:weightSum="2">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Location" android:textColor="#666666"/>
+            <TextView android:id="@+id/textResultLocation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Office A" android:textStyle="bold" android:textSize="16sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Owner" android:textColor="#666666"/>
+            <TextView android:id="@+id/textResultOwner" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="John Doe" android:textStyle="bold" android:textSize="16sp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Actions -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnViewDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Full Details"
+        android:layout_marginTop="24dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnScanNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Scan Next Asset"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>

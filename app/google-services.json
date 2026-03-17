@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "816161376916",
+    "project_id": "smartassetmanager-bc6bd",
+    "storage_bucket": "smartassetmanager-bc6bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816161376916:android:97a9697c949f28b5b7c281",
+        "android_client_info": {
+          "package_name": "com.etachi.smartassetmanagement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCjxdx8ON-LN3CVJLAJE7sGN5F30A4sMk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

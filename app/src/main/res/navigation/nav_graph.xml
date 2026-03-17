@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_dashboard">
+
+    <!-- Placeholder for Dashboard -->
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.etachi.smartassetmanagement.ui.dashboard.DashboardFragment"
+        android:label="Dashboard" />
+
+    <!-- Placeholder for Assets -->
+    <fragment
+        android:id="@+id/navigation_assets"
+        android:name="com.etachi.smartassetmanagement.ui.assets.AssetsFragment"
+        android:label="Assets" />
+
+    <!-- Placeholder for Scanner -->
+    <fragment
+        android:id="@+id/navigation_scanner"
+        android:name="com.etachi.smartassetmanagement.ui.scanner.ScannerFragment"
+        android:label="Scanner" />
+
+    <!-- Placeholder for Profile -->
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.etachi.smartassetmanagement.ui.profile.ProfileFragment"
+        android:label="Profile" />
+
+</navigation>
