@@ -8,7 +8,6 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -20,6 +19,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartAssetManagement">
         <activity
+            android:name=".ui.admin.UserManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.EditRoleActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
@@ -29,12 +34,7 @@
         <activity
             android:name=".ui.detail.AddAssetActivity"
             android:exported="false" />
-        <activity
-            android:name=".DashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+
         <activity
             android:name=".ui.detail.AssetDetailActivity"
             android:exported="false" />

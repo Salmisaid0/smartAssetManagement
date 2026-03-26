@@ -1,21 +1,28 @@
 package com.etachi.smartassetmanagement.ui.list
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.etachi.smartassetmanagement.data.model.Asset
-import com.etachi.smartassetmanagement.data.model.ScanHistory // IMPORT THIS
+import com.etachi.smartassetmanagement.data.model.ScanHistory
 import com.etachi.smartassetmanagement.data.repository.AssetRepository
+import com.etachi.smartassetmanagement.domain.model.Permission
 import com.etachi.smartassetmanagement.ui.scanner.ScanMode
+import com.etachi.smartassetmanagement.utils.UserSessionManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AssetViewModel(private val repository: AssetRepository) : ViewModel() {
+@HiltViewModel
+class AssetViewModel @Inject constructor(
+    private val repository: AssetRepository,
+    private val sessionManager: UserSessionManager
+) : ViewModel() {
 
     // 1. Search Query State
     private val _searchQuery = MutableStateFlow("")
 
-    // 2. Scan Mode State
+    // 2. Scan Mode State (Missing in your previous version)
     private val _scanMode = MutableStateFlow(ScanMode.IDENTIFY)
     val scanMode: StateFlow<ScanMode> = _scanMode.asStateFlow()
 
@@ -30,18 +37,16 @@ class AssetViewModel(private val repository: AssetRepository) : ViewModel() {
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // --- NEW: SCAN HISTORY ---
-    // This was missing. It connects to the Repository to get the history list.
+    // 4. Scan History
     val scanHistory: Flow<List<ScanHistory>> = repository.getScanHistory()
 
-    // --------------------------
+    // 5. Dashboard Stats
     data class DashboardStats(
         val total: Int = 0,
         val active: Int = 0,
         val maintenance: Int = 0
     )
 
-    // Add this inside the AssetViewModel class
     val stats: StateFlow<DashboardStats> = assets.map { list ->
         DashboardStats(
             total = list.size,
@@ -49,6 +54,8 @@ class AssetViewModel(private val repository: AssetRepository) : ViewModel() {
             maintenance = list.count { it.status == "Maintenance" }
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DashboardStats())
+
+    // --- Functions ---
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
@@ -59,64 +66,50 @@ class AssetViewModel(private val repository: AssetRepository) : ViewModel() {
     }
 
     fun insertAsset(asset: Asset) {
+        if (!sessionManager.hasPermission(Permission.ASSET_CREATE)) return
         viewModelScope.launch {
             repository.insertAsset(asset)
         }
     }
 
     fun deleteAsset(asset: Asset) {
+        if (!sessionManager.hasPermission(Permission.ASSET_DELETE)) return
         viewModelScope.launch {
             repository.deleteAsset(asset)
         }
     }
 
     fun updateAsset(asset: Asset) {
+        if (!sessionManager.hasPermission(Permission.ASSET_EDIT)) return
         viewModelScope.launch {
             repository.updateAsset(asset)
         }
     }
 
     fun updateAssetStatus(asset: Asset, newStatus: String) {
+        if (!sessionManager.hasPermission(Permission.SCAN_MAINTENANCE)) return
         viewModelScope.launch {
             val updatedAsset = asset.copy(status = newStatus)
             repository.updateAsset(updatedAsset)
         }
     }
 
-    // Updated to match Repository signature (Asset, String, String?)
     fun logScan(asset: Asset, action: String, location: String?) {
         viewModelScope.launch {
             repository.logScanEvent(asset, action, location)
         }
     }
 
-    fun addDummyData() {
-        viewModelScope.launch {
-            repository.insertAsset(Asset("", "Dell XPS 15", "Laptop", "Active", "Office A", "John Doe", "SN-123", null, null))
-            repository.insertAsset(Asset("", "HP Server", "Server", "Maintenance", "Data Center", "IT Team", "SN-456", null, null))
-            repository.insertAsset(Asset("", "MacBook Pro", "Laptop", "Active", "Office B", "Jane Smith", "SN-789", null, null))
-        }
-    }
-
-    class Factory(private val repository: AssetRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(AssetViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return AssetViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
+    // MISSING FUNCTION ADDED HERE
     fun checkInAsset(asset: Asset) {
-        viewModelScope.launch {
-            // 1. Ask repository who is the current user
-            val currentUser = repository.getCurrentUser()
+        if (!sessionManager.hasPermission(Permission.SCAN_CHECK_IN)) return
 
-            // 2. If user exists, update the asset
+        viewModelScope.launch {
+            val currentUser = repository.getCurrentUser()
             if (currentUser != null) {
                 val updatedAsset = asset.copy(
-                    owner = currentUser.email, // Set Owner to current user
-                    status = "In Use"          // Set Status to In Use
+                    owner = currentUser.email,
+                    status = "In Use"
                 )
                 repository.updateAsset(updatedAsset)
             }
