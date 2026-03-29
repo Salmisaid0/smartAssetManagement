@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Brand (Vibrant Blue for Dark Mode) -->
-    <color name="primary">#5B9DFA</color>      <!-- Lighter Blue for dark bg -->
-    <color name="primary_dark">#2563EB</color>
-    <color name="primary_light">#1E3A5F</color> <!-- Used for card backgrounds -->
+    <!-- Primary Brand Color (A deep, trustworthy corporate blue) -->
+    <color name="md_theme_light_primary">#1A56DB</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
 
-    <!-- Secondary (Success Green) -->
-    <color name="secondary">#10B981</color>
-    <color name="secondary_dark">#10B981</color>
+    <!-- Secondary Brand Color (For accents/icons) -->
+    <color name="md_theme_light_secondary">#5A6270</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
 
-    <!-- Neutrals (Dark Backgrounds) -->
-    <color name="background">#121212</color>    <!-- Pure Dark / AMOLED -->
-    <color name="surface">#1E1E1E</color>       <!-- Card Backgrounds -->
-    <color name="surface_variant">#2C2C2C</color> <!-- Slightly lighter surface -->
+    <!-- Tertiary Color (For special highlights) -->
+    <color name="md_theme_light_tertiary">#006B5E</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
 
-    <!-- Error -->
-    <color name="error">#CF6679</color>
+    <!-- Error & Success (Crucial for UI feedback) -->
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_success">#006D3B</color>
 
-    <!-- Text (Light for readability) -->
-    <color name="text_primary">#FFFFFF</color>  <!-- White -->
-    <color name="text_secondary">#B0B0B0</color> <!-- Light Grey -->
-    <color name="text_disabled">#666666</color>
+    <!-- Surfaces (Backgrounds and Cards - Notice they are slightly off-white, not pure #FFFFFF) -->
+    <color name="md_theme_light_background">#F8F9FA</color>
+    <color name="md_theme_light_surface">#F8F9FA</color>
 
-    <!-- Basic -->
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
+    <!-- Text Colors (Never use pure black #000000 for text, it's too harsh) -->
+    <color name="md_theme_light_onBackground">#1A1C1E</color>
+    <color name="md_theme_light_onSurface">#1A1C1E</color>
+    <color name="md_theme_light_onSurfaceVariant">#44474E</color>
+
+    <!-- ======================================================== -->
+    <!-- DARK MODE COLORS (Automatically applied when system is dark) -->
+    <!-- ======================================================== -->
+    <color name="md_theme_dark_primary">#A9C7FF</color>
+    <color name="md_theme_dark_onPrimary">#003062</color>
+    <color name="md_theme_dark_secondary">#C2C9D6</color>
+    <color name="md_theme_dark_onSecondary">#253141</color>
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_background">#1A1C1E</color>
+    <color name="md_theme_dark_surface">#1A1C1E</color>
+    <color name="md_theme_dark_onBackground">#E2E3E8</color>
+    <color name="md_theme_dark_onSurface">#E2E3E8</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C4C6D0</color>
 </resources>

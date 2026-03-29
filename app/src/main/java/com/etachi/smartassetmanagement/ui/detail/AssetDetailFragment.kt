@@ -1,11 +1,10 @@
 package com.etachi.smartassetmanagement.ui.detail
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -47,7 +46,6 @@ class AssetDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup Toolbar Navigation (Back Button)
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
@@ -57,16 +55,19 @@ class AssetDetailFragment : Fragment() {
     }
 
     private fun setupButtons() {
-        // SECURITY: Hide buttons if user lacks permission
         binding.btnEdit.showIfHasPermission(sessionManager, Permission.ASSET_EDIT)
         binding.btnDelete.showIfHasPermission(sessionManager, Permission.ASSET_DELETE)
 
         binding.btnEdit.setOnClickListener {
             currentAsset?.let { asset ->
-                // Navigate to Edit Screen (Using Intent for now as AddAssetActivity is still an Activity)
-                val intent = Intent(requireContext(), AddAssetActivity::class.java)
-                intent.putExtra("ASSET_OBJ", asset)
-                startActivity(intent)
+                // 1. Put the asset in a Bundle
+                val bundle = bundleOf("assetObj" to asset)
+
+                // 2. Use the action ID that ALREADY EXISTS in your nav_graph.xml
+                // Start typing "R.id.action" and let Android Studio autocomplete
+                // the exact name of the action that points to AddAssetFragment.
+                // It probably looks like R.id.action_assetsFragment_to_addAssetFragment
+                findNavController().navigate(R.id.action_assetsFragment_to_addAssetFragment, bundle)
             }
         }
 
@@ -74,7 +75,6 @@ class AssetDetailFragment : Fragment() {
             currentAsset?.let {
                 if (sessionManager.hasPermission(Permission.ASSET_DELETE)) {
                     viewModel.deleteAsset(it)
-                    // Go back to list
                     findNavController().navigateUp()
                 }
             }
@@ -101,21 +101,9 @@ class AssetDetailFragment : Fragment() {
         binding.textDetailId.text = "ID: ${asset.id}"
 
         // 2. Status Chip
+        // FIXED: Deleted the ugly when() block.
+        // The XML now handles all colors automatically via Material 3 themes (?attr/colorPrimaryContainer).
         binding.chipDetailStatus.text = asset.status
-        when (asset.status) {
-            "Active", "In Use" -> {
-                binding.chipDetailStatus.setBackgroundResource(R.drawable.bg_status_active)
-                binding.chipDetailStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary_dark))
-            }
-            "Maintenance" -> {
-                binding.chipDetailStatus.setBackgroundResource(R.drawable.bg_status_maintenance)
-                binding.chipDetailStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
-            }
-            else -> {
-                binding.chipDetailStatus.setBackgroundResource(R.drawable.bg_status_default)
-                binding.chipDetailStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
-            }
-        }
 
         // 3. Info Grid
         binding.textDetailCategory.text = asset.type
@@ -128,7 +116,7 @@ class AssetDetailFragment : Fragment() {
     }
 
     private fun startIoTSimulation() {
-        ioTSimulationJob?.cancel() // Cancel previous job if any
+        ioTSimulationJob?.cancel()
         ioTSimulationJob = lifecycleScope.launch {
             while (isActive) {
                 val temp = random.nextInt(15) + 20
@@ -137,9 +125,9 @@ class AssetDetailFragment : Fragment() {
                 binding.textTemp.text = "$temp °C"
                 binding.textBattery.text = "$battery %"
 
-                val statusView = binding.textStatus
-                statusView.text = "Online"
-                statusView.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
+                // FIXED: Removed ContextCompat.getColor().
+                // The XML handles the text color based on the active theme (Light/Dark).
+                binding.textStatus.text = "Online"
 
                 kotlinx.coroutines.delay(3000)
             }

@@ -1,107 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_rounded"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@drawable/bg_bottom_sheet_rounded">
+    android:paddingHorizontal="24dp"
+    android:paddingTop="32dp"
+    android:paddingBottom="24dp">
 
-    <!-- Success Icon -->
+    <!-- 1. Success Icon (Replaced legacy drawable with clean vector) -->
     <ImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@android:drawable/checkbox_on_background"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="Success"
+        android:src="@drawable/check_mark_circle_2_svgrepo_com" />
 
-    <TextView
+    <!-- 2. Title -->
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/textResultTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Asset Recognized"
-        android:textSize="20sp"
-        android:textStyle="bold"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="12dp"
+        android:text="Asset Recognized"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
-    <!-- Asset Name -->
-    <TextView
+    <!-- 3. Hero Asset Name -->
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/textResultName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Dell XPS 15"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="4dp"
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="?attr/colorOnSurface"
+        android:textStyle="bold"
+        tools:text="Dell XPS 15" />
 
-    <!-- Status Badge -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardResultStatus"
+    <!-- 4. High-Visibility Status Pill (Uses M3 Semantic Colors) -->
+    <!-- Removed the CardView wrapper. A simple TextView with M3 colors is lighter and more stable -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textResultStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="#E8F5E9">
+        android:layout_marginTop="12dp"
+        android:background="?attr/colorPrimaryContainer"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="6dp"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorOnPrimaryContainer"
+        android:textStyle="bold"
+        tools:text="Active" />
 
-        <TextView
-            android:id="@+id/textResultStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            android:text="Active"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="#4CAF50"/>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Details Grid -->
+    <!-- 5. Data Grid -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginTop="24dp"
+        android:orientation="horizontal"
         android:weightSum="2">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Location" android:textColor="#666666"/>
-            <TextView android:id="@+id/textResultLocation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Office A" android:textStyle="bold" android:textSize="16sp"/>
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textResultLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold"
+                tools:text="Office A" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Owner" android:textColor="#666666"/>
-            <TextView android:id="@+id/textResultOwner" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="John Doe" android:textStyle="bold" android:textSize="16sp"/>
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Owner"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textResultOwner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold"
+                tools:text="John Doe" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Actions -->
+    <!-- 6. Actions (Restored to your original logical order) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnViewDetails"
+        style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:text="View Full Details"
-        android:layout_marginTop="24dp"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+        app:cornerRadius="12dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnScanNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Scan Next Asset"
-        android:layout_marginTop="8dp"/>
+        app:cornerRadius="12dp" />
 
 </LinearLayout>

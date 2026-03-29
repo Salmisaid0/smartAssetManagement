@@ -18,6 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartAssetManagement">
+
+        <!-- Keep your existing Activities -->
         <activity
             android:name=".ui.admin.UserManagementActivity"
             android:exported="false" />
@@ -31,19 +33,15 @@
             android:name=".PortraitCaptureActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity
-            android:name=".ui.detail.AddAssetActivity"
-            android:exported="false" />
 
-        <activity
-            android:name=".ui.detail.AssetDetailActivity"
-            android:exported="false" />
+        <!-- REMOVED THE INCORRECT AddAssetFragment ACTIVITY CODE -->
+
+
         <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

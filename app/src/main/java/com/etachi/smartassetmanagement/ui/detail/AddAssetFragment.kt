@@ -59,8 +59,12 @@ class AddAssetFragment : Fragment() {
 
     private fun setupSpinner() {
         val statuses = arrayOf("Active", "Maintenance", "Retired")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, statuses)
-        binding.spinnerStatus.adapter = adapter
+
+        // 1. Use ArrayAdapters made for AutoCompleteTextView
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statuses)
+
+        // 2. Attach it to the new ExposedDropdownMenu
+        binding.spinnerStatus.setAdapter(adapter)
     }
 
     private fun setupMode() {
@@ -78,9 +82,10 @@ class AddAssetFragment : Fragment() {
             binding.inputOwner.setText(existingAsset!!.owner)
             binding.inputSerial.setText(existingAsset!!.serialNumber)
 
-            val adapter = binding.spinnerStatus.adapter as ArrayAdapter<String>
-            val position = adapter.getPosition(existingAsset!!.status)
-            binding.spinnerStatus.setSelection(position)
+            // FIXED: AutoCompleteTextView uses setText(), NOT setSelection()
+            // The 'false' parameter prevents the dropdown list from opening automatically
+            binding.spinnerStatus.setText(existingAsset!!.status, false)
+
         } else {
             // --- ADD MODE ---
             binding.toolbar.title = "New Asset"
@@ -96,7 +101,10 @@ class AddAssetFragment : Fragment() {
         binding.btnSaveAsset.setOnClickListener {
             val name = binding.inputName.text.toString().trim()
             val type = binding.inputType.text.toString().trim()
-            val status = binding.spinnerStatus.selectedItem.toString()
+
+            // FIXED: AutoCompleteTextView uses .text, NOT .selectedItem
+            val status = binding.spinnerStatus.text.toString().trim()
+
             val location = binding.inputLocation.text.toString().trim()
             val owner = binding.inputOwner.text.toString().trim()
             val serial = binding.inputSerial.text.toString().trim()

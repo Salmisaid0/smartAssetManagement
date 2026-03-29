@@ -2,84 +2,95 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="?attr/materialCardViewFilledStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="0dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="#E5E7EB"
-    app:cardBackgroundColor="?attr/colorSurface">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
 
-        <!-- Avatar / Icon Circle -->
-        <FrameLayout
+        <!-- Premium Micro-Elevated Avatar -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/iconContainer"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_circle_primary_light"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardBackgroundColor="?attr/colorPrimaryContainer"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/textInitial"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="D"
-                android:textColor="@color/primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </FrameLayout>
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorOnPrimaryContainer"
+                tools:text="D" />
 
-        <!-- Asset Name -->
-        <TextView
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Title: Prominent and Scannable -->
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textAssetName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Dell XPS 15"
-            android:textAppearance="?attr/textAppearanceSubtitle1"
-            android:textColor="@color/text_primary"
+            android:layout_marginStart="14dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/chipStatus"
             app:layout_constraintStart_toEndOf="@+id/iconContainer"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Dell XPS 15" />
 
-        <!-- Asset Details (Location / ID) -->
-        <TextView
+        <!-- Subtitle: Soft and Informational -->
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textAssetDetails"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Office A • SN-12345"
-            android:textAppearance="?attr/textAppearanceCaption"
-            android:textColor="@color/text_secondary"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/textAssetName"
-            app:layout_constraintTop_toBottomOf="@+id/textAssetName" />
+            app:layout_constraintStart_toEndOf="@+id/iconContainer"
+            app:layout_constraintTop_toBottomOf="@+id/textAssetName"
+            tools:text="Office A • SN-12345" />
 
-        <!-- Status Badge (The Pill) -->
-        <TextView
+        <!-- Status Pill: Contrasting Tertiary Color for visual pop -->
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chipStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Active"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@color/secondary_dark"
-            android:background="@drawable/bg_status_active"
+            android:layout_marginStart="12dp"
+            android:background="?attr/colorTertiaryContainer"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorOnTertiaryContainer"
+            app:layout_constraintBottom_toBottomOf="@+id/textAssetName"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toTopOf="@+id/textAssetName"
+            tools:text="Active" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

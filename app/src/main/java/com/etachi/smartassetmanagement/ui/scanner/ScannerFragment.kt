@@ -21,6 +21,7 @@ import com.etachi.smartassetmanagement.PortraitCaptureActivity
 import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.data.model.Asset
 import com.etachi.smartassetmanagement.domain.model.Permission
+import com.etachi.smartassetmanagement.ui.detail.AssetDetailFragment
 import com.etachi.smartassetmanagement.ui.list.AssetViewModel
 import com.etachi.smartassetmanagement.utils.UserSessionManager
 import com.etachi.smartassetmanagement.utils.enableIfHasPermission
@@ -208,7 +209,7 @@ class ScannerFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.btnViewDetails).setOnClickListener {
-            val intent = Intent(requireContext(), AssetDetailActivity::class.java)
+            val intent = Intent(requireContext(), AssetDetailFragment::class.java)
             intent.putExtra("ASSET_ID", asset.id)
             startActivity(intent)
             dialog.dismiss()

@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.etachi.smartassetmanagement.data.model.Asset
 import com.etachi.smartassetmanagement.databinding.FragmentAssetsBinding
 import com.etachi.smartassetmanagement.domain.model.Permission
 import com.etachi.smartassetmanagement.ui.list.AssetAdapter
@@ -48,7 +50,6 @@ class AssetsFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = AssetAdapter { asset ->
-            // Navigate to Detail Screen using Navigation Component only
             val action = AssetsFragmentDirections.actionAssetsFragmentToAssetDetailFragment(asset.id)
             findNavController().navigate(action)
         }
@@ -62,17 +63,13 @@ class AssetsFragment : Fragment() {
         binding.fabAdd.showIfHasPermission(sessionManager, Permission.ASSET_CREATE)
 
         binding.fabAdd.setOnClickListener {
-            // Navigate to Add Screen (passing null because it's a new asset)
-            val action = AssetsFragmentDirections.actionAssetsFragmentToAddAssetFragment(null)
+            val action = AssetsFragmentDirections.actionAssetsFragmentToAddAssetFragment()
             findNavController().navigate(action)
         }
 
-        binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = true
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.setSearchQuery(newText ?: "")
-                return true
-            }
+        // USE THIS BLOCK
+        binding.editTextSearch.addTextChangedListener(afterTextChanged = { editable ->
+            viewModel.setSearchQuery(editable.toString())
         })
     }
 

@@ -1,67 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="?attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Header -->
-        <LinearLayout
+        <!-- 1. FLAWLESS HEADER -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewFilledStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
-            android:background="?attr/colorSurface"
-            android:elevation="4dp">
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Inventory"
-                android:textAppearance="?attr/textAppearanceHeadline4"
-                android:textColor="@color/text_primary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Manage your company assets"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="2dp"/>
-
-            <!-- Modern Search Bar Card -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="24dp"
+                android:paddingBottom="20dp">
 
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Inventory"
+                    android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                    android:textColor="?attr/colorOnSurface" />
 
-                <androidx.appcompat.widget.SearchView
-                    android:id="@+id/searchView"
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Manage your company assets"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <!-- 2. BULLETPROOF M3 SEARCH BAR -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/searchInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:iconifiedByDefault="false"
-                    android:queryHint="Search by name or ID..."
-                    />
+                    android:layout_marginTop="20dp"
+                    app:boxBackgroundColor="?attr/colorSurfaceContainerHighest"
+                    app:boxCornerRadiusBottomEnd="28dp"
+                    app:boxCornerRadiusBottomStart="28dp"
+                    app:boxCornerRadiusTopEnd="28dp"
+                    app:boxCornerRadiusTopStart="28dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:endIconDrawable="@drawable/search_alt_1_svgrepo_com"
+                    app:startIconTint="?attr/colorOnSurfaceVariant">
 
-            </androidx.cardview.widget.CardView>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextSearch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Search by name or ID..."
+                        android:inputType="textFilter"
+                        android:paddingVertical="16dp"
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
 
-        </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- List Area with Swipe Refresh -->
+                <!-- 3. CONTEXTUAL DATA TEXT -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/textResultCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="?attr/colorPrimary"
+                    tools:text="12 assets found" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 4. PERFECTLY SCROLLING LIST AREA -->
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
@@ -71,68 +93,66 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <!-- The List -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewAssets"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:clipToPadding="false"
-                    android:padding="8dp"
-                    tools:listitem="@layout/item_asset"/>
+                    android:paddingTop="8dp"
+                    android:paddingBottom="100dp"
+                    tools:listitem="@layout/item_asset" />
 
-                <!-- Empty State -->
+                <!-- 5. PREMIUM EMPTY STATE -->
                 <LinearLayout
                     android:id="@+id/emptyStateView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    android:padding="32dp">
+                    android:padding="32dp"
+                    android:visibility="gone">
 
                     <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:src="@android:drawable/ic_menu_report_image"
-                        android:alpha="0.3"
-                        android:tint="@color/text_secondary"
-                        tools:ignore="UseAppTint"/>
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:alpha="0.4"
+                        android:contentDescription="No assets"
+                        android:src="@drawable/ic_inventory_outline_24"
+                        app:tint="?attr/colorOutline" />
 
-                    <TextView
+                    <com.google.android.material.textview.MaterialTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
                         android:text="No Assets Found"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginTop="16dp"/>
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSurface" />
 
-                    <TextView
+                    <com.google.android.material.textview.MaterialTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tap the + button to add your first asset."
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary"
                         android:layout_marginTop="8dp"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:text="Tap the + button to add your first asset."
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
-            </FrameLayout>
 
+            </FrameLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </LinearLayout>
 
-    <!-- Add Button (FAB) -->
+    <!-- 6. STANDARD M3 FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
-        android:src="@android:drawable/ic_input_add"
-        android:contentDescription="Add Asset"
-        app:backgroundTint="@color/primary"
-        app:tint="@color/white"
-        app:elevation="6dp"/>
+        android:contentDescription="Add new asset"
+        app:fabCustomSize="56dp"
+        app:srcCompat="@drawable/ic_add_24"
+        app:tint="?attr/colorOnPrimary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

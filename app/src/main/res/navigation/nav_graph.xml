@@ -5,63 +5,63 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/navigation_dashboard">
 
-    <!-- 1. Dashboard -->
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.etachi.smartassetmanagement.ui.dashboard.DashboardFragment"
         android:label="Dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
-    <!-- 2. Assets List -->
     <fragment
-        android:id="@+id/navigation_assets"
+        android:id="@+id/assetsFragment"
         android:name="com.etachi.smartassetmanagement.ui.assets.AssetsFragment"
         android:label="Assets"
         tools:layout="@layout/fragment_assets">
 
-        <!-- ACTION: Move from Assets List to Detail Screen -->
-        <action
-            android:id="@+id/action_assetsFragment_to_assetDetailFragment"
-            app:destination="@id/assetDetailFragment" />
-    </fragment>
+    <action
+        android:id="@+id/action_assetsFragment_to_assetDetailFragment"
+        app:destination="@id/assetDetailFragment" />
 
-    <!-- 3. Scanner -->
-    <fragment
-        android:id="@+id/navigation_scanner"
-        android:name="com.etachi.smartassetmanagement.ui.scanner.ScannerFragment"
-        android:label="Scanner"
-        tools:layout="@layout/fragment_scanner" />
+    <action
+        android:id="@+id/action_assetsFragment_to_addAssetFragment"
+        app:destination="@id/addAssetFragment" />
 
-    <!-- 4. Profile -->
-    <fragment
-        android:id="@+id/navigation_profile"
-        android:name="com.etachi.smartassetmanagement.ui.profile.ProfileFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+</fragment>
 
-    <!-- 5. Asset Detail (Destination) -->
-    <fragment
-        android:id="@+id/assetDetailFragment"
-        android:name="com.etachi.smartassetmanagement.ui.detail.AssetDetailFragment"
-        android:label="Asset Detail"
-        tools:layout="@layout/fragment_asset_detail">
+<fragment
+android:id="@+id/navigation_scanner"
+android:name="com.etachi.smartassetmanagement.ui.scanner.ScannerFragment"
+android:label="Scanner"
+tools:layout="@layout/fragment_scanner" />
 
-        <!-- Argument: The ID passed to this screen -->
-        <argument
-            android:name="assetId"
-            app:argType="string" />
-    </fragment>
-    <fragment
-        android:id="@+id/addAssetFragment"
-        android:name="com.etachi.smartassetmanagement.ui.detail.AddAssetFragment"
-        android:label="Add/Edit Asset"
-        tools:layout="@layout/fragment_add_asset">
+<fragment
+android:id="@+id/navigation_profile"
+android:name="com.etachi.smartassetmanagement.ui.profile.ProfileFragment"
+android:label="Profile"
+tools:layout="@layout/fragment_profile" />
 
-        <!-- CRITICAL: Name must be 'assetObj' and nullable=true -->
-        <argument
-            android:name="assetObj"
-            app:argType="com.etachi.smartassetmanagement.data.model.Asset"
-            app:nullable="true"
-            android:defaultValue="@null" />
-    </fragment>
-</navigation>
+<fragment
+android:id="@+id/assetDetailFragment"
+android:name="com.etachi.smartassetmanagement.ui.detail.AssetDetailFragment"
+android:label="Asset Detail"
+tools:layout="@layout/fragment_asset_detail">
+
+<argument
+    android:name="assetId"
+    app:argType="string" />
+</fragment>
+
+    <!-- 6. Add Asset -->
+<fragment
+android:id="@+id/addAssetFragment"
+android:name="com.etachi.smartassetmanagement.ui.detail.AddAssetFragment"
+android:label="Add Asset"
+tools:layout="@layout/fragment_add_asset">
+
+<argument
+    android:name="assetObj"
+    app:argType="com.etachi.smartassetmanagement.data.model.Asset"
+    app:nullable="true"
+    android:defaultValue="@null" />
+
+</fragment>
+    </navigation>

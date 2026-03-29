@@ -36,12 +36,7 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // --- REMOVED OLD MANUAL VIEWMODEL SETUP ---
-        // val repository = ...
-        // val factory = ...
-        // viewModel = ...
 
-        // 1. UI References
         val textTotal = view.findViewById<TextView>(R.id.textTotal)
         val textActive = view.findViewById<TextView>(R.id.textActive)
         val textMaintenance = view.findViewById<TextView>(R.id.textMaintenance)
@@ -88,5 +83,6 @@ class DashboardFragment : Fragment() {
             val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
             bottomNav.selectedItemId = R.id.navigation_assets
         }
+
     }
 }
