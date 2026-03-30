@@ -4,60 +4,113 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels // 1. Import this for Shared ViewModel
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.etachi.smartassetmanagement.R
+import com.etachi.smartassetmanagement.databinding.FragmentDashboardBinding
 import com.etachi.smartassetmanagement.ui.list.AssetViewModel
 import com.etachi.smartassetmanagement.ui.scanner.ScanHistoryAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import dagger.hilt.android.AndroidEntryPoint // 2. Import Hilt annotation
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-@AndroidEntryPoint // 3. Add this annotation
+@AndroidEntryPoint
 class DashboardFragment : Fragment() {
 
-    // 4. Use 'by activityViewModels()' to share this ViewModel with other fragments (like AssetsFragment)
-    // Hilt handles the creation automatically. No manual Factory needed.
+    private var _binding: FragmentDashboardBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: AssetViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_dashboard, container, false)
+    ): View {
+        _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupHeader()
+        setupStats()
+        setupActions()
+        setupHistoryList()
+    }
 
-        val textTotal = view.findViewById<TextView>(R.id.textTotal)
-        val textActive = view.findViewById<TextView>(R.id.textActive)
-        val textMaintenance = view.findViewById<TextView>(R.id.textMaintenance)
+    private fun setupHeader() {
+        // Formatage de la date
+        val dateFormat = SimpleDateFormat("EEEE, dd MMMM", Locale.getDefault())
+        binding.textGreetingDate.text = dateFormat.format(Date()).uppercase()
 
-        // Actions
-        val actionScan = view.findViewById<View>(R.id.actionScan)
-        val actionAdd = view.findViewById<View>(R.id.actionAdd)
-        val actionSearch = view.findViewById<View>(R.id.actionSearch)
+        // Texte d'accueil par défaut (Modifie-le avec sessionManager plus tard si tu veux)
+        binding.textWelcomeEmail.text = "Welcome, User"
 
-        // 2. Observe Stats
+        // Rôle par défaut
+        binding.chipUserRole.text = "Administrator"
+    }
+
+    private fun setupStats() {
         lifecycleScope.launch {
             viewModel.stats.collectLatest { stats ->
-                textTotal.text = stats.total.toString()
-                textActive.text = stats.active.toString()
-                textMaintenance.text = stats.maintenance.toString()
+                binding.textTotal.text = stats.total.toString()
+                binding.textActive.text = stats.active.toString()
+                binding.textMaintenance.text = stats.maintenance.toString()
+
+                // Barres de progression dynamiques (Méthode 100% sûre)
+                updateProgressBar(binding.barActiveFill, stats.active, stats.total)
+                    updateProgressBar(binding.barMaintenanceFill, stats.maintenance, stats.total)
+            }
+        }
+    }
+
+    private fun updateProgressBar(bar: View, currentValue: Int, totalValue: Int) {
+        val parent = bar.parent as? FrameLayout ?: return  // safe cast, exit if null
+
+        parent.post {  // post on PARENT — it's already measured at this point
+            val safeTotal = totalValue.coerceAtLeast(1)
+            val percentage = currentValue.toFloat() / safeTotal
+            val params = bar.layoutParams as FrameLayout.LayoutParams
+            params.width = (percentage * parent.width).toInt()  // parent.width is now > 0
+            bar.layoutParams = params
+        }
+    }
+
+    private fun setupActions() {
+        // SAFE METHOD: Doesn't need to know the ID of the BottomNavigationView
+        binding.actionScan.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.navigation_scanner)
+            } catch (e: Exception) {
+                // Fallback if navigation ID is different in your graph
+                val bottomNav = requireActivity().findViewById<View>(R.id.bottom_nav)
+                bottomNav?.performClick()
             }
         }
 
-        // 3. Setup History List
+        binding.actionAdd.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.navigation_assets)
+            } catch (e: Exception) {
+                val bottomNav = requireActivity().findViewById<View>(R.id.bottom_nav)
+                bottomNav?.performClick()
+            }
+        }
+    }
+
+    private fun setupHistoryList() {
         val historyAdapter = ScanHistoryAdapter()
-        view.findViewById<RecyclerView>(R.id.rvDashboardHistory).apply {
+        binding.rvDashboardHistory.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = historyAdapter
         }
@@ -65,24 +118,16 @@ class DashboardFragment : Fragment() {
         lifecycleScope.launch {
             viewModel.scanHistory.collectLatest { list ->
                 historyAdapter.submitList(list)
+
+                // Afficher/Masquer l'état vide proprement
+                binding.layoutEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                binding.rvDashboardHistory.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
             }
         }
+    }
 
-        // 4. Handle Clicks (Navigation)
-        actionScan.setOnClickListener {
-            val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-            bottomNav.selectedItemId = R.id.navigation_scanner
-        }
-
-        actionAdd.setOnClickListener {
-            val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-            bottomNav.selectedItemId = R.id.navigation_assets
-        }
-
-        actionSearch.setOnClickListener {
-            val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-            bottomNav.selectedItemId = R.id.navigation_assets
-        }
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground">
+    android:background="?attr/background">
 
     <!-- 1. Top App Bar (Crucial for standalone Activities so users aren't trapped) -->
     <com.google.android.material.appbar.MaterialToolbar
@@ -15,18 +15,6 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="User Management" />
 
-    <!-- 2. Context Subtitle -->
-    <com.google.android.material.textview.MaterialTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:text="Tap a user to assign or update their role."
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-
-    <!-- 3. Scrollable List Area -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listUsers"
         android:layout_width="match_parent"
@@ -47,8 +35,7 @@
         android:orientation="vertical"
         android:padding="32dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:layout_width="64dp"

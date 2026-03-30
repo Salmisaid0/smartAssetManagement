@@ -6,7 +6,6 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-kapt")
 
-    // ✅ Updated Hilt (IMPORTANT)
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
 }
@@ -48,7 +47,6 @@ android {
         jvmTarget = "11"
     }
 }
-
 dependencies {
 
     // Core
@@ -66,7 +64,6 @@ dependencies {
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    implementation(libs.cardview.v7)
     kapt("androidx.room:room-compiler:2.6.1")
 
     // Retrofit
@@ -94,17 +91,12 @@ dependencies {
     // Swipe refresh
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
 
-    // ✅ HILT (FIXED)
+    // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-compiler:2.50")
-
-    //  DO NOT add javapoet manually here
 
     // Tests
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    implementation(platform("androidx.compose.material3:material3-bom:2024.10.01"))
-    implementation("com.google.android.material:material:1.12.0")
 }

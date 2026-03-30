@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground"
+    android:background="?attr/background"
     android:clipToPadding="false"
     android:paddingBottom="24dp">
 
@@ -62,8 +62,7 @@
         android:clickable="false"
         android:text="Administrator"
         app:chipBackgroundColor="?attr/colorSecondaryContainer"
-        app:chipTextColor="?attr/colorOnSecondaryContainer"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="?attr/colorOnSecondaryContainer"        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textProfileTitle" />
 
@@ -214,12 +213,6 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     android:textColor="?attr/colorOnSurface" />
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Arrow"
-                    android:src="@drawable/ic_chevron_right_24"
-                    app:tint="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
             <com.google.android.material.divider.MaterialDivider

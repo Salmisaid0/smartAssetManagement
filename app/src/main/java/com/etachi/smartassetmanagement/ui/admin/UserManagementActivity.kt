@@ -1,13 +1,19 @@
 package com.etachi.smartassetmanagement.ui.admin
 
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.etachi.smartassetmanagement.data.model.Role
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.data.model.User
 import com.etachi.smartassetmanagement.databinding.ActivityUserManagementBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textview.MaterialTextView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -24,25 +30,60 @@ class UserManagementActivity : AppCompatActivity() {
         binding = ActivityUserManagementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.toolbar.setNavigationOnClickListener { finish() }
+
         setupObservers()
     }
 
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.users.collectLatest { users ->
-                // Simple list adapter for users
-                val adapter = android.widget.ArrayAdapter(
-                    this@UserManagementActivity,
-                    android.R.layout.simple_list_item_2,
-                    users.map { "${it.email}\nRole: ${it.roleId}" }
-                )
+                binding.emptyStateView.visibility = if (users.isEmpty()) View.VISIBLE else View.GONE
+                binding.listUsers.visibility = if (users.isEmpty()) View.GONE else View.VISIBLE
+
+                val adapter = UserAdapter { user ->
+                    showRoleSelectionDialog(user)
+                }
+                binding.listUsers.layoutManager = LinearLayoutManager(this@UserManagementActivity)
                 binding.listUsers.adapter = adapter
 
-                binding.listUsers.setOnItemClickListener { _, _, position, _ ->
-                    showRoleSelectionDialog(users[position])
-                }
+                (adapter as UserAdapter).submitList(users)
             }
         }
+    }
+
+    private inner class UserAdapter(
+        private val onUserClick: (User) -> Unit
+    ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
+
+        private var users: List<User> = emptyList()
+
+        fun submitList(newList: List<User>) {
+            users = newList
+            notifyDataSetChanged()
+        }
+
+        inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val textUserEmail: MaterialTextView = itemView.findViewById(R.id.textUserEmail)
+            val textUserRole: MaterialTextView = itemView.findViewById(R.id.textUserRole)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_user, parent, false)
+            return UserViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
+            val user = users[position]
+            holder.textUserEmail.text = user.email
+            holder.textUserRole.text = user.roleId
+
+            holder.itemView.setOnClickListener {
+                onUserClick(user)
+            }
+        }
+
+        override fun getItemCount(): Int = users.size
     }
 
     private fun showRoleSelectionDialog(user: User) {

@@ -22,31 +22,15 @@ class AssetAdapter(
             binding.textAssetName.text = asset.name
             binding.textAssetDetails.text = "${asset.location} • ${asset.serialNumber}"
 
-            // Set Initials
             val initial = if (asset.name.isNotEmpty()) asset.name[0].uppercaseChar() else '?'
             binding.textInitial.text = initial.toString()
 
-            // Set Status text
+
             binding.chipStatus.text = asset.status
 
-            // Set Status Colors (Logic from your original code)
             val context = binding.root.context
-            when (asset.status) {
-                "Active", "In Use" -> {
-                    binding.chipStatus.setBackgroundResource(R.drawable.bg_status_active)
-                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.secondary_dark))
-                }
-                "Maintenance" -> {
-                    binding.chipStatus.setBackgroundResource(R.drawable.bg_status_maintenance)
-                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.primary_dark))
-                }
-                else -> {
-                    binding.chipStatus.setBackgroundResource(R.drawable.bg_status_default)
-                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
-                }
-            }
+            binding.chipStatus.text = asset.status
 
-            // Click Listener
             binding.root.setOnClickListener { onItemClick(asset) }
         }
     }

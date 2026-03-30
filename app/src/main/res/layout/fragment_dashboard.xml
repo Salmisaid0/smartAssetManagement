@@ -1,336 +1,545 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background">
+    android:background="@color/dash_bg"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="40dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/surface"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp">
 
-        <TextView
+        <!-- ═══════════════════════════════════════════════════════
+             1. HEADER
+             • Date sub-label (uppercase label style)
+             • Bold welcome headline
+             • Pill badge for role with live-status dot
+        ══════════════════════════════════════════════════════════ -->
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textGreetingDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Good Morning,"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"/>
+            android:letterSpacing="0.08"
+            android:textAllCaps="true"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="@color/dash_text_hint"
+            tools:text="Monday, 30 March" />
 
-        <TextView
-            android:id="@+id/textUserName"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textWelcomeEmail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Asset Manager"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
+            android:layout_marginTop="4dp"
+            android:letterSpacing="-0.02"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textColor="@color/dash_text_primary"
+            tools:text="Welcome, John" />
+
+        <!-- Role pill with status dot -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_role_pill"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <!--
+                bg_role_pill.xml (res/drawable/):
+                <shape xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:shape="rectangle">
+                    <solid android:color="@color/dash_surface_elevated"/>
+                    <stroke android:width="1dp" android:color="@color/dash_border_strong"/>
+                    <corners android:radius="20dp"/>
+                </shape>
+            -->
+
+            <!-- Live status dot -->
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/bg_status_dot"
+                android:importantForAccessibility="no" />
+
+            <!--
+                bg_status_dot.xml (res/drawable/):
+                <shape xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:shape="oval">
+                    <solid android:color="@color/dash_teal"/>
+                </shape>
+            -->
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/chipUserRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:importantForAccessibility="no"
+                android:letterSpacing="0.06"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_muted"
+                tools:text="Administrator" />
+        </LinearLayout>
+
+        <!-- ═══════════════════════════════════════════════════════
+             2. STAT CARDS GRID
+             Design improvements:
+             • Colored top-accent bar encodes meaning:
+               Blue = Total, Teal = Active, Amber = Maintenance
+             • Monospaced numbers for professional density
+             • Micro progress bar shows proportion at a glance
+             • Consistent content descriptions for a11y
+        ══════════════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:orientation="horizontal">
+
+            <!-- Total Assets -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTotalAssets"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:contentDescription="50 total assets"
+                app:cardBackgroundColor="@color/dash_surface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/dash_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="12dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <!-- Colored top accent bar -->
+                    <View
+                        android:layout_width="32dp"
+                        android:layout_height="2dp"
+                        android:background="@color/dash_blue"
+                        android:importantForAccessibility="no" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/textTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:importantForAccessibility="no"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textColor="@color/dash_text_primary"
+                        tools:text="50" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:importantForAccessibility="no"
+                        android:letterSpacing="0.07"
+                        android:text="Total"
+                        android:textAllCaps="true"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="@color/dash_text_hint" />
+
+                    <!-- Progress bar: 100% fill for total -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@color/dash_border"
+                        android:importantForAccessibility="no">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@color/dash_blue_surface" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Active Assets -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardActiveAssets"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp"
+                android:layout_weight="1"
+                android:contentDescription="42 active assets"
+                app:cardBackgroundColor="@color/dash_surface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/dash_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="12dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <View
+                        android:layout_width="32dp"
+                        android:layout_height="2dp"
+                        android:background="@color/dash_teal"
+                        android:importantForAccessibility="no" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/textActive"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:importantForAccessibility="no"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textColor="@color/dash_text_primary"
+                        tools:text="42" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:importantForAccessibility="no"
+                        android:letterSpacing="0.07"
+                        android:text="Active"
+                        android:textAllCaps="true"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="@color/dash_text_hint" />
+
+                    <!-- Progress bar fill driven by % from ViewModel (84%) -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@color/dash_border"
+                        android:importantForAccessibility="no">
+
+                        <!--
+                            Set width programmatically in Fragment:
+                            val pct = (active.toFloat() / total) * bar.width
+                            barFill.updateLayoutParams { width = pct.toInt() }
+                        -->
+                        <View
+                            android:id="@+id/barActiveFill"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/dash_teal_surface" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Maintenance Assets -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMaintenanceAssets"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:contentDescription="8 assets in maintenance"
+                app:cardBackgroundColor="@color/dash_surface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/dash_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="12dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <View
+                        android:layout_width="32dp"
+                        android:layout_height="2dp"
+                        android:background="@color/dash_amber"
+                        android:importantForAccessibility="no" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/textMaintenance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:importantForAccessibility="no"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textColor="@color/dash_text_primary"
+                        tools:text="8" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:importantForAccessibility="no"
+                        android:letterSpacing="0.07"
+                        android:text="Service"
+                        android:textAllCaps="true"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="@color/dash_text_hint" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@color/dash_border"
+                        android:importantForAccessibility="no">
+
+                        <View
+                            android:id="@+id/barMaintenanceFill"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/dash_amber_surface" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- ═══════════════════════════════════════════════════════
+             3. QUICK ACTIONS SHORTCUT BAR
+             Design improvements:
+             • Scan: filled teal icon box — primary action is clear
+             • Add: subtle surface icon box — secondary hierarchy
+             • Icon boxes use drawable backgrounds for proper theming
+             • Clear visual distinction between primary & secondary
+        ══════════════════════════════════════════════════════════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/dash_surface"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/dash_border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- PRIMARY: Scan -->
+                <LinearLayout
+                    android:id="@+id/actionScan"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Scan QR code"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:minHeight="48dp"
+                    android:orientation="vertical">
+
+                    <!--
+                        bg_icon_teal.xml:
+                        <shape><solid android:color="@color/dash_teal_surface"/>
+                        <stroke android:width="1dp" android:color="@color/dash_teal"/>
+                        <corners android:radius="12dp"/></shape>
+                    -->
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_icon_teal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/qr_code_svgrepo_com"
+                            app:tint="@color/dash_teal" />
+                    </FrameLayout>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:importantForAccessibility="no"
+                        android:text="Scan"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="@color/dash_teal" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="44dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:background="@color/dash_border"
+                    android:importantForAccessibility="no" />
+
+                <!-- SECONDARY: Add Asset -->
+                <LinearLayout
+                    android:id="@+id/actionAdd"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Add new asset"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:minHeight="48dp"
+                    android:orientation="vertical">
+
+                    <!--
+                        bg_icon_surface.xml:
+                        <shape><solid android:color="@color/dash_surface_elevated"/>
+                        <stroke android:width="1dp" android:color="@color/dash_border_strong"/>
+                        <corners android:radius="12dp"/></shape>
+                    -->
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_icon_surface">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_add"
+                            app:tint="@color/dash_text_muted" />
+                    </FrameLayout>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:importantForAccessibility="no"
+                        android:text="Add Asset"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="@color/dash_text_muted" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══════════════════════════════════════════════════════
+             4. RECENT ACTIVITY
+             Design improvements:
+             • Section header has "See all" action
+             • Each row shows: icon (colored per status) + asset
+               name + actor sub-label + status badge + timestamp
+             • Status badge background + text uses semantic colors
+             • Item rows use a subtle separator (not a full divider)
+        ══════════════════════════════════════════════════════════ -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="0.08"
+                android:text="Recent Activity"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSeeAll"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="0dp"
+                android:text="See all"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_teal" />
+        </LinearLayout>
+
+        <!--
+            RecyclerView uses item_scan_history_redesigned.xml (see below).
+            app:layoutManager declared in XML avoids NPE if Fragment skips setup.
+        -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDashboardHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="3"
+            tools:listitem="@layout/item_scan_history" />
+
+        <!-- Empty state -->
+        <LinearLayout
+            android:id="@+id/layoutEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingVertical="48dp"
+            android:visibility="gone"
+            tools:visibility="gone">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:alpha="0.25"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_history"
+                app:tint="@color/dash_text_muted" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="No recent activity"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/dash_text_muted" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:alpha="0.6"
+                android:gravity="center"
+                android:text="Scan a QR code or add an asset\nto see activity here"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="@color/dash_text_hint" />
+        </LinearLayout>
 
     </LinearLayout>
-
-    <!-- Stats Grid -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center">
-
-        <!-- Card 1: Total -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp">
-
-                <TextView
-                    android:id="@+id/textTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="125"
-                    android:textColor="@color/primary"
-                    android:textSize="28sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Total Assets"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Card 2: Active -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp">
-
-                <TextView
-                    android:id="@+id/textActive"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="110"
-                    android:textColor="@color/secondary"
-                    android:textSize="28sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Active"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Card 3: Maintenance -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp">
-
-                <TextView
-                    android:id="@+id/textMaintenance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="15"
-                    android:textColor="@color/error"
-                    android:textSize="28sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Maintenance"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-
-    </LinearLayout>
-
-    <!-- NEW: QUICK ACTIONS SECTION -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Quick Actions"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center">
-
-        <!-- Action 1: Scan -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/actionScan"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface"
-            android:clickable="true"
-            android:foreground="?attr/selectableItemBackground">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:tint="@color/primary"
-                    android:src="@android:drawable/ic_menu_camera"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Scan"
-                    android:textColor="@color/primary"
-                    android:textStyle="bold"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Action 5: Add role !-->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/add_role_action"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface"
-            android:clickable="true"
-            android:foreground="?attr/selectableItemBackground">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:tint="@color/text_secondary"
-                    android:src="@drawable/ic_user_role"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Scan"
-                    android:textColor="@color/white"
-                    android:textStyle="bold"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-
-        <!-- Action 2: Add -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/actionAdd"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface"
-            android:clickable="true"
-            android:foreground="?attr/selectableItemBackground">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_add"
-                    android:tint="@color/text_primary"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Add Asset"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Action 3: Search -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/actionSearch"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface"
-            android:clickable="true"
-            android:foreground="?attr/selectableItemBackground">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_search"
-                    android:tint="@color/text_primary"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Search"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-    </LinearLayout>
-
-    <!-- Recent Activity Header -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Recent Activity"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"/>
-
-    <!-- Activity List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvDashboardHistory"
-        android:layout_width="match_parent"
-        android:layout_marginHorizontal="10dp"
-        android:background="@drawable/bg_stat_card"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false"
-        tools:listitem="@layout/item_scan_history"/>
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

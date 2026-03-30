@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground"
+    android:background="?attr/background"
     android:fitsSystemWindows="true">
 
     <!-- 1. MODERN TOOLBAR (Auto-handles dark mode title/icons) -->
@@ -113,7 +113,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:contentDescription="Live Status"
-                            android:src="@drawable/ic_online_indicator_24"
+                            android:src="@drawable/bg_status_active"
                             app:tint="?attr/colorPrimary" />
 
                         <com.google.android.material.textview.MaterialTextView

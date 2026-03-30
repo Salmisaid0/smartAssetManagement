@@ -1,92 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="?attr/materialCardViewFilledStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="0dp">
+    android:gravity="center_vertical"
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:paddingVertical="10dp">
 
-    <!-- Flattened inner layout to a single ConstraintLayout for better RecyclerView performance -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
 
-        <!-- Asset Name -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textHistoryAssetName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textColor="?attr/colorOnSurface"
-            app:layout_constraintEnd_toStartOf="@+id/textHistoryTime"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="MacBook Pro 15&quot;" />
+    <FrameLayout
+        android:id="@+id/histIconBox"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:background="@drawable/bg_icon_surface">
 
-        <!-- Timestamp -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textHistoryTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="10 mins ago" />
-
-        <!-- Action Badge (Semantic Material 3 Tag) -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textHistoryAction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="?attr/colorPrimaryContainer"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:textAllCaps="true"
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            android:textColor="?attr/colorOnPrimaryContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textHistoryAssetName"
-            tools:text="MAINTENANCE" />
-
-        <!-- User Icon (Extracted from drawableStart for better alignment & tinting) -->
         <ImageView
-            android:id="@+id/iconUser"
+            android:id="@+id/histIcon"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_marginTop="10dp"
-            android:contentDescription="@string/content_description_user_icon"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_person_outline_24"
-            app:layout_constraintBottom_toBottomOf="@+id/textHistoryUser"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textHistoryAction"
-            app:tint="?attr/colorOnSurfaceVariant" />
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no" />
+    </FrameLayout>
 
-        <!-- User Email -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textHistoryUser"
-            android:layout_width="0dp"
+            android:id="@+id/histTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/iconUser"
-            app:layout_constraintTop_toBottomOf="@+id/textHistoryAction"
-            tools:text="By: john.doe@company.com" />
+            android:textColor="@color/dash_text_secondary"
+            tools:text="Laptop #LPT-0042" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/histSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="@color/dash_text_hint"
+            tools:text="Scanned by Ahmed K." />
+    </LinearLayout>
 
-</com.google.android.material.card.MaterialCardView>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end|center_vertical"
+        android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/histBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:letterSpacing="0.04"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            tools:text="Active" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/histTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:letterSpacing="0.02"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="@color/dash_text_hint"
+            tools:text="2m ago" />
+    </LinearLayout>
+
+</LinearLayout>

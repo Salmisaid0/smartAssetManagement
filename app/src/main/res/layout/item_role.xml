@@ -50,13 +50,11 @@
             android:id="@+id/iconChevron"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/content_description_edit_role"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_chevron_right"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/colorOnSurfaceVariant" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

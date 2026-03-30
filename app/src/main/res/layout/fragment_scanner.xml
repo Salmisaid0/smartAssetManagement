@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground"
+    android:background="?attr/background"
     android:fitsSystemWindows="true">
 
     <androidx.core.widget.NestedScrollView
@@ -121,7 +121,6 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:layout_gravity="center"
-                            android:contentDescription="@string/content_description_scan"
                             android:src="@drawable/qr_code_svgrepo_com"
                             app:tint="?attr/colorOnPrimaryContainer" />
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground"
+    android:background="?attr/background"
     android:paddingHorizontal="24dp">
 
     <!-- CENTER CONTAINER: Prevents ScrollView fighting the keyboard -->
@@ -104,11 +104,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="24dp" <!-- Prevents clipping when pushed up by keyboard -->
-        android:padding="8dp"
-        android:text="Forgot Password?"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorPrimary" />
+            android:layout_marginBottom="24dp"
+            android:padding="8dp"
+            android:text="Forgot Password?"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary" />
 
     </LinearLayout>
 

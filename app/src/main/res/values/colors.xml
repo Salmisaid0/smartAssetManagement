@@ -40,4 +40,27 @@
     <color name="md_theme_dark_onBackground">#E2E3E8</color>
     <color name="md_theme_dark_onSurface">#E2E3E8</color>
     <color name="md_theme_dark_onSurfaceVariant">#C4C6D0</color>
+    <color name="dash_bg">#0D1117</color>
+    <color name="dash_surface">#131820</color>
+    <color name="dash_surface_elevated">#1C2030</color>
+    <color name="dash_border">#1E2535</color>
+    <color name="dash_border_strong">#2A3045</color>
+
+    <color name="dash_text_primary">#F0F2F5</color>
+    <color name="dash_text_secondary">#C8D0DE</color>
+    <color name="dash_text_muted">#8A94A8</color>
+    <color name="dash_text_hint">#4A5568</color>
+
+    <color name="dash_teal">#1D9E75</color>
+    <color name="dash_teal_surface">#0F3D2E</color>
+    <color name="dash_teal_text">#5DCAA5</color>
+
+    <color name="dash_amber">#EF9F27</color>
+    <color name="dash_amber_surface">#2D1F0A</color>
+    <color name="dash_amber_text">#FAC775</color>
+
+    <color name="dash_blue">#378ADD</color>
+    <color name="dash_blue_surface">#1E3A5A</color>
+    <color name="dash_blue_text">#85B7EB</color>
+
 </resources>

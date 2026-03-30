@@ -5,4 +5,13 @@
     <dimen name="spacing_m">16dp</dimen>
     <dimen name="spacing_l">24dp</dimen>
     <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="dash_radius_card">16dp</dimen>
+    <dimen name="dash_radius_icon">12dp</dimen>
+    <dimen name="dash_radius_badge">6dp</dimen>
+    <dimen name="dash_radius_pill">20dp</dimen>
+    <dimen name="dash_spacing_xs">4dp</dimen>
+    <dimen name="dash_spacing_sm">8dp</dimen>
+    <dimen name="dash_spacing_md">16dp</dimen>
+    <dimen name="dash_spacing_lg">24dp</dimen>
+    <dimen name="dash_spacing_xl">32dp</dimen>
 </resources>

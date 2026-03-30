@@ -32,7 +32,7 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val textEmail = view.findViewById<TextView>(R.id.textEmail)
-        val textRole = view.findViewById<TextView>(R.id.textRole)
+        val textRole = view.findViewById<TextView>(R.id.textUserRole)
         val btnLogout = view.findViewById<Button>(R.id.btnLogout)
 
         // Fetch current user data
