@@ -1,7 +1,6 @@
 package com.etachi.smartassetmanagement.ui.list
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -9,26 +8,45 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.data.model.Asset
-import com.etachi.smartassetmanagement.databinding.ItemAssetBinding // Make sure you have ViewBinding enabled
+import com.etachi.smartassetmanagement.databinding.ItemAssetBinding
 
 class AssetAdapter(
-    private val onItemClick: (Asset) -> Unit // 1. Constructor accepts click listener
+    private val onItemClick: (Asset) -> Unit
 ) : ListAdapter<Asset, AssetAdapter.AssetViewHolder>(AssetDiffCallback()) {
 
-    // 2. ViewHolder inner class
     inner class AssetViewHolder(private val binding: ItemAssetBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(asset: Asset) {
             binding.textAssetName.text = asset.name
-            binding.textAssetDetails.text = "${asset.location} • ${asset.serialNumber}"
+            binding.textAssetDetails.text = "${asset.location} · ${asset.serialNumber}" // Changed to middle dot
 
-            val initial = if (asset.name.isNotEmpty()) asset.name[0].uppercaseChar() else '?'
-            binding.textInitial.text = initial.toString()
+            // PRO TIP: Extract 2 letters for a better logo feel (e.g., "Dell XPS" -> "DX")
+            val words = asset.name.split(" ")
+            val initials = if (words.size >= 2) {
+                "${words[0].firstOrNull()}${words[1].firstOrNull()}".uppercase()
+            } else {
+                asset.name.take(2).uppercase()
+            }
+            binding.textInitial.text = initials
 
-
-            binding.chipStatus.text = asset.status
-
+            // Apply Dynamic Colors to the Chip based on Status
             val context = binding.root.context
+            when (asset.status.lowercase()) {
+                "active" -> {
+                    binding.chipStatus.setChipBackgroundColorResource(R.color.md_theme_light_success) // Or your specific green container color
+                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_success)) // Or your specific green text color
+                }
+                "maintenance" -> {
+                    binding.chipStatus.setChipBackgroundColorResource(R.color.dash_amber) // Make sure these exist in colors.xml
+                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.dash_amber))
+                }
+                else -> { // Retired or unknown
+                    binding.chipStatus.setChipBackgroundColorResource(R.color.md_theme_light_onSurfaceVariant)
+                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onSurfaceVariant))
+                }
+            }
+
+            // Set text AFTER colors to prevent visual glitches
             binding.chipStatus.text = asset.status
 
             binding.root.setOnClickListener { onItemClick(asset) }
@@ -45,18 +63,11 @@ class AssetAdapter(
     }
 
     override fun onBindViewHolder(holder: AssetViewHolder, position: Int) {
-        val asset = getItem(position) // Uses ListAdapter's getItem
-        holder.bind(asset)
+        holder.bind(getItem(position))
     }
 
-    // DiffUtil class for efficient updates
     class AssetDiffCallback : DiffUtil.ItemCallback<Asset>() {
-        override fun areItemsTheSame(oldItem: Asset, newItem: Asset): Boolean {
-            return oldItem.id == newItem.id
-        }
-
-        override fun areContentsTheSame(oldItem: Asset, newItem: Asset): Boolean {
-            return oldItem == newItem
-        }
+        override fun areItemsTheSame(oldItem: Asset, newItem: Asset): Boolean = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: Asset, newItem: Asset): Boolean = oldItem == newItem
     }
 }

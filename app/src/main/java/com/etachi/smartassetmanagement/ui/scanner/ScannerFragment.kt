@@ -1,7 +1,9 @@
 package com.etachi.smartassetmanagement.ui.scanner
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -9,23 +11,26 @@ import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels // 1. Import for Hilt
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.etachi.smartassetmanagement.PortraitCaptureActivity
 import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.data.model.Asset
+import com.etachi.smartassetmanagement.databinding.FragmentScannerBinding
 import com.etachi.smartassetmanagement.domain.model.Permission
-import com.etachi.smartassetmanagement.ui.detail.AssetDetailFragment
 import com.etachi.smartassetmanagement.ui.list.AssetViewModel
 import com.etachi.smartassetmanagement.utils.UserSessionManager
 import com.etachi.smartassetmanagement.utils.enableIfHasPermission
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,59 +38,76 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@AndroidEntryPoint // 2. Add Annotation
+@AndroidEntryPoint
 class ScannerFragment : Fragment() {
 
-    // 3. Use 'by activityViewModels()' (Shared ViewModel)
+    private var _binding: FragmentScannerBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: AssetViewModel by activityViewModels()
     private lateinit var historyAdapter: ScanHistoryAdapter
 
-    // 4. Inject Session Manager for Permission Checks
     @Inject
     lateinit var sessionManager: UserSessionManager
 
+    // 1. Camera Permission Launcher
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            startScanner()
+        } else {
+            showPermissionDeniedDialog()
+        }
+    }
+
+    // 2. Barcode Scanner Launcher
     private val scanLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             handleScanResult(result.contents)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_scanner, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentScannerBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Removed setupViewModel() - Hilt handles it
-        setupHistoryList(view)
-        setupModeSelector(view)
-        setupScanButton(view)
+        setupHistoryList()
+        setupModeSelector()
+        setupScanButton()
     }
 
-    private fun setupHistoryList(view: View) {
-        val rvHistory = view.findViewById<RecyclerView>(R.id.rvScanHistory)
+    private fun setupHistoryList() {
         historyAdapter = ScanHistoryAdapter()
-        rvHistory.layoutManager = LinearLayoutManager(requireContext())
-        rvHistory.adapter = historyAdapter
+        binding.rvScanHistory.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvScanHistory.adapter = historyAdapter
 
         lifecycleScope.launch {
             viewModel.scanHistory.collectLatest { historyList ->
                 historyAdapter.submitList(historyList)
-                val emptyView = view.findViewById<View>(R.id.emptyStateView)
-                emptyView?.visibility = if (historyList.isEmpty()) View.VISIBLE else View.GONE
+
+                // Toggle empty state and RecyclerView
+                binding.emptyStateView.visibility =
+                    if (historyList.isEmpty()) View.VISIBLE else View.GONE
+                binding.rvScanHistory.visibility =
+                    if (historyList.isEmpty()) View.GONE else View.VISIBLE
             }
         }
     }
 
-    private fun setupModeSelector(view: View) {
-        val chipGroup = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.chipGroupModes)
-
+    private fun setupModeSelector() {
         // --- SECURITY ENFORCEMENT ---
-        // Disable chips if user lacks permission
-        view.findViewById<View>(R.id.chipMaintenance).enableIfHasPermission(sessionManager, Permission.SCAN_MAINTENANCE)
-        view.findViewById<View>(R.id.chipAudit).enableIfHasPermission(sessionManager, Permission.SCAN_AUDIT)
-        view.findViewById<View>(R.id.chipCheckIn).enableIfHasPermission(sessionManager, Permission.SCAN_CHECK_IN)
+        binding.chipMaintenance.enableIfHasPermission(sessionManager, Permission.SCAN_MAINTENANCE)
+        binding.chipAudit.enableIfHasPermission(sessionManager, Permission.SCAN_AUDIT)
+        binding.chipCheckIn.enableIfHasPermission(sessionManager, Permission.SCAN_CHECK_IN)
 
         lifecycleScope.launch {
             viewModel.scanMode.collectLatest { mode ->
@@ -93,7 +115,7 @@ class ScannerFragment : Fragment() {
             }
         }
 
-        chipGroup.setOnCheckedChangeListener { _, checkedId ->
+        binding.chipGroupModes.setOnCheckedChangeListener { _, checkedId ->
             val mode = when (checkedId) {
                 R.id.chipIdentify -> ScanMode.IDENTIFY
                 R.id.chipCheckIn -> ScanMode.CHECK_IN
@@ -105,9 +127,28 @@ class ScannerFragment : Fragment() {
         }
     }
 
-    private fun setupScanButton(view: View) {
-        view.findViewById<Button>(R.id.btnStartScan).setOnClickListener {
-            startScanner()
+    private fun setupScanButton() {
+        binding.btnStartScan.setOnClickListener {
+            checkCameraPermissionAndOpen()
+        }
+    }
+
+    private fun checkCameraPermissionAndOpen() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                startScanner()
+            }
+
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                showPermissionRationaleDialog()
+            }
+
+            else -> {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
         }
     }
 
@@ -120,6 +161,31 @@ class ScannerFragment : Fragment() {
         options.setBarcodeImageEnabled(true)
         options.setCaptureActivity(PortraitCaptureActivity::class.java)
         scanLauncher.launch(options)
+    }
+
+    private fun showPermissionRationaleDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Camera Required")
+            .setMessage("Camera access is needed to scan QR codes.")
+            .setPositiveButton("Allow") { _, _ ->
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showPermissionDeniedDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Permission Denied")
+            .setMessage("Open Settings to enable camera access.")
+            .setPositiveButton("Settings") { _, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = android.net.Uri.fromParts("package", requireContext().packageName, null)
+                }
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun handleScanResult(scannedId: String) {
@@ -208,19 +274,23 @@ class ScannerFragment : Fragment() {
             }
         }
 
-        view.findViewById<Button>(R.id.btnViewDetails).setOnClickListener {
-            val intent = Intent(requireContext(), AssetDetailFragment::class.java)
-            intent.putExtra("ASSET_ID", asset.id)
-            startActivity(intent)
+        view.findViewById<View>(R.id.btnViewDetails).setOnClickListener {
+            val bundle = bundleOf("assetId" to asset.id)
+            findNavController().navigate(R.id.assetDetailFragment, bundle)
             dialog.dismiss()
         }
 
-        view.findViewById<Button>(R.id.btnScanNext).setOnClickListener {
+        view.findViewById<View>(R.id.btnScanNext).setOnClickListener {
             dialog.dismiss()
-            startScanner()
+            checkCameraPermissionAndOpen()
         }
 
         dialog.setContentView(view)
         dialog.show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

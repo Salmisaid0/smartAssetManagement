@@ -61,7 +61,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupStats() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.stats.collectLatest { stats ->
                 binding.textTotal.text = stats.total.toString()
                 binding.textActive.text = stats.active.toString()
@@ -69,7 +69,7 @@ class DashboardFragment : Fragment() {
 
                 // Barres de progression dynamiques (Méthode 100% sûre)
                 updateProgressBar(binding.barActiveFill, stats.active, stats.total)
-                    updateProgressBar(binding.barMaintenanceFill, stats.maintenance, stats.total)
+                updateProgressBar(binding.barMaintenanceFill, stats.maintenance, stats.total)
             }
         }
     }

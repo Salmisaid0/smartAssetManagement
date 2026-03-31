@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Checked: Teal border -->
+    <item android:color="@color/dash_teal" android:state_checked="true" />
+    <!-- Unchecked: Default border -->
+    <item android:color="@color/dash_border" />
+</selector>

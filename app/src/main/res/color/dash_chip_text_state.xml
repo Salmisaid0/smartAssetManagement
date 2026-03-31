@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Checked: Teal text (on teal surface = readable) -->
+    <item android:color="@color/dash_teal" android:state_checked="true" />
+    <!-- Unchecked: Muted text -->
+    <item android:color="@color/dash_text_muted" />
+</selector>

@@ -2,35 +2,27 @@
     <!-- Base application theme (LIGHT MODE) -->
     <style name="Theme.SmartAssetManagement" parent="Theme.Material3.DayNight.NoActionBar">
 
-        <!-- Primary -->
         <item name="colorPrimary">@color/md_theme_light_primary</item>
         <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_light_primary</item>
 
-        <!-- Secondary -->
         <item name="colorSecondary">@color/md_theme_light_secondary</item>
         <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
 
-        <!-- Tertiary (ADD THIS) -->
         <item name="colorTertiary">@color/md_theme_light_tertiary</item>
         <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
 
-        <!-- Background / Surface -->
         <item name="background">@color/md_theme_light_background</item>
         <item name="colorSurface">@color/md_theme_light_surface</item>
 
-        <!-- Text -->
         <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
         <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
 
-        <!-- Error -->
         <item name="colorError">@color/md_theme_light_error</item>
         <item name="colorOnError">@color/md_theme_light_onError</item>
 
-        <!-- REQUIRED (this is often the crash reason) -->
         <item name="colorSurfaceVariant">@color/md_theme_light_surface</item>
 
-        <!-- System bars -->
         <item name="android:statusBarColor">@color/md_theme_light_background</item>
         <item name="android:navigationBarColor">@color/md_theme_light_surface</item>
 

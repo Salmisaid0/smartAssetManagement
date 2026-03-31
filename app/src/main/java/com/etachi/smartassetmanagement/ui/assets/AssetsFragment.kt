@@ -67,14 +67,13 @@ class AssetsFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        // USE THIS BLOCK
         binding.editTextSearch.addTextChangedListener(afterTextChanged = { editable ->
             viewModel.setSearchQuery(editable.toString())
         })
     }
 
     private fun observeData() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.assets.collectLatest { assetList ->
                 adapter.submitList(assetList)
                 binding.emptyStateView.visibility = if (assetList.isEmpty()) View.VISIBLE else View.GONE

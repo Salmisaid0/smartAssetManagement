@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="?attr/materialCardViewFilledStyle"
+    android:id="@+id/cardRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="6dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="0dp">
+    app:cardBackgroundColor="@color/dash_surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/dash_border"
+    app:strokeWidth="1dp"
+    app:rippleColor="@color/dash_border">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="14dp">
+        android:padding="16dp">
 
-        <!-- Premium Micro-Elevated Avatar -->
+        <!-- ─── AVATAR (Matches Dashboard Action Box style) ─── -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/iconContainer"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:cardBackgroundColor="?attr/colorPrimaryContainer"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            app:cardBackgroundColor="@color/dash_surface_elevated"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/dash_border"
+            app:strokeWidth="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -36,61 +40,63 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="?attr/colorOnPrimaryContainer"
-                tools:text="D" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/dash_text_primary"
+                tools:text="DX" />
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Title: Prominent and Scannable -->
+        <!-- ─── PRIMARY TEXT ─── -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textAssetName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
+            android:layout_marginStart="16dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold"
+            android:textColor="@color/dash_text_primary"
+            android:textFontWeight="600"
             app:layout_constraintEnd_toStartOf="@+id/chipStatus"
             app:layout_constraintStart_toEndOf="@+id/iconContainer"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Dell XPS 15" />
+            tools:text="Dell XPS 15 9530" />
 
-        <!-- Subtitle: Soft and Informational -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textAssetDetails"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="2dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/iconContainer"
-            app:layout_constraintTop_toBottomOf="@+id/textAssetName"
-            tools:text="Office A • SN-12345" />
-
-        <!-- Status Pill: Contrasting Tertiary Color for visual pop -->
-        <com.google.android.material.textview.MaterialTextView
+        <!-- ─── STATUS PILL ─── -->
+        <!-- Colors for this chip are set DYNAMICALLY in your Adapter -->
+        <com.google.android.material.chip.Chip
             android:id="@+id/chipStatus"
+            style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:background="?attr/colorTertiaryContainer"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="3dp"
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            android:textColor="?attr/colorOnTertiaryContainer"
+            android:clickable="false"
+            android:letterSpacing="0.05"
+            android:textAllCaps="true"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            app:chipCornerRadius="6dp"
+            app:chipMinHeight="26dp"
+            app:chipStrokeWidth="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/textAssetName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/textAssetName"
             tools:text="Active" />
+
+        <!-- ─── METADATA ROW ─── -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textAssetDetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="@color/dash_text_muted"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iconContainer"
+            app:layout_constraintTop_toBottomOf="@+id/textAssetName"
+            tools:text="Office A · SN-12345" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

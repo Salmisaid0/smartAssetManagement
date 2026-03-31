@@ -490,6 +490,8 @@
             RecyclerView uses item_scan_history_redesigned.xml (see below).
             app:layoutManager declared in XML avoids NPE if Fragment skips setup.
         -->
+
+        <!-- Empty state -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvDashboardHistory"
             android:layout_width="match_parent"
@@ -501,7 +503,6 @@
             tools:itemCount="3"
             tools:listitem="@layout/item_scan_history" />
 
-        <!-- Empty state -->
         <LinearLayout
             android:id="@+id/layoutEmptyState"
             android:layout_width="match_parent"

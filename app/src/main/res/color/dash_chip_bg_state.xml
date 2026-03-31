@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Checked: Teal surface -->
+    <item android:color="@color/dash_teal_surface" android:state_checked="true" />
+    <!-- Unchecked: Transparent (border provides definition) -->
+    <item android:color="@android:color/transparent" />
+</selector>

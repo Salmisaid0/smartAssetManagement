@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/assetsFragment"
+        android:id="@+id/navigation_assets"
         android:name="com.etachi.smartassetmanagement.ui.assets.AssetsFragment"
         android:label="Assets"
         tools:layout="@layout/fragment_assets">
