@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused: Teal border -->
+    <item android:color="@color/dash_teal" android:state_focused="true" />
+    <!-- Hovered -->
+    <item android:color="@color/dash_teal" android:state_hovered="true" />
+    <!-- Default unfocused: Standard border -->
+    <item android:color="@color/dash_border" />
+</selector>

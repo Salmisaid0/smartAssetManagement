@@ -27,7 +27,12 @@ class LoginActivity : AppCompatActivity() {
         binding.btnLogin.setOnClickListener {
             val email = binding.inputEmail.text.toString().trim()
             val password = binding.inputPassword.text.toString().trim()
-            viewModel.onLoginClick(email, password)
+
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                viewModel.onLoginClick(email, password)
+            } else {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Observe State

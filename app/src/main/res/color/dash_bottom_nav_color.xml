@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When tab is selected -->
+    <item android:color="@color/dash_teal" android:state_checked="true" />
+    <!-- When tab is not selected -->
+    <item android:color="@color/dash_text_hint" />
+</selector>

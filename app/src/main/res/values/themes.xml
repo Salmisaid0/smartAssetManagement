@@ -23,8 +23,14 @@
 
         <item name="colorSurfaceVariant">@color/md_theme_light_surface</item>
 
-        <item name="android:statusBarColor">@color/md_theme_light_background</item>
-        <item name="android:navigationBarColor">@color/md_theme_light_surface</item>
+        <item name="android:statusBarColor">@color/dash_bg</item>
+        <item name="android:navigationBarColor">@color/dash_teal_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+
+
+
 
     </style>
+
 </resources>

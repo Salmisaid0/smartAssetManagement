@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/background"
+    android:background="@color/dash_bg"
     android:paddingHorizontal="24dp">
 
     <!-- CENTER CONTAINER: Prevents ScrollView fighting the keyboard -->
@@ -19,57 +19,71 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- 1. LOGO (Fixed the invisible icon bug) -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- 1. LOGO (Matches Scanner Action Zone icon pattern) -->
+        <!-- Reusing bg_icon_teal_large.xml here, just sized down to 72dp -->
+        <FrameLayout
             android:layout_width="72dp"
             android:layout_height="72dp"
-            app:cardBackgroundColor="?attr/colorPrimary"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp">
+            android:background="@drawable/bg_icon_teal_large">
 
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_gravity="center"
                 android:contentDescription="App Logo"
-                android:src="@drawable/ic_launcher_foreground"
-                app:tint="?attr/colorOnPrimary" /> <!-- Changed from primary to OnPrimary so it's visible -->
+                android:importantForAccessibility="no"
+                android:src="@drawable/qr_code_svgrepo_com"
+                app:tint="@color/dash_teal" />
+        </FrameLayout>
 
-        </com.google.android.material.card.MaterialCardView>
-
+        <!-- 2. HEADER TEXT (Matches Dashboard/Scanner typography) -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:letterSpacing="-0.02"
             android:text="E-krello"
             android:textAppearance="?attr/textAppearanceHeadlineMedium"
-            android:textColor="?attr/colorOnSurface" />
+            android:textColor="@color/dash_text_primary" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Sign in to manage your assets"
+            android:textSize="30sp"
+            android:text="Sign in"
             android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textColor="@color/dash_teal_surface" />
 
-        <!-- 2. MODERN M3 INPUTS (Upgraded from deprecated MaterialComponents) -->
+        <!-- 3. ACCENT BAR (Matches Dashboard/Scanner visual grounding) -->
+        <View
+            android:layout_width="32dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="24dp"
+            android:background="@color/dash_teal"
+            android:importantForAccessibility="no" />
+
+        <!-- 4. M3 INPUTS (Custom themed to match dash borders) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEmail"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:hint="Email Address"
-            app:startIconTint="?attr/colorOnSurfaceVariant">
+            app:boxBackgroundColor="@color/dash_surface"
+            app:boxStrokeColor="@color/dash_input_stroke_state"
+            app:boxStrokeWidth="1dp"
+            app:boxStrokeWidthFocused="1dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:textColor="@color/dash_text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -79,26 +93,53 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Password"
-            app:endIconMode="password_toggle">
+            app:boxBackgroundColor="@color/dash_surface"
+            app:boxStrokeColor="@color/dash_input_stroke_state"
+            app:boxStrokeWidth="1dp"
+            app:boxStrokeWidthFocused="1dp"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/dash_text_muted">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textColor="@color/dash_text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 3. PRIMARY ACTION BUTTON (Removed fixed 56dp height, let M3 handle it) -->
-        <com.google.android.material.button.MaterialButton
+        <!-- 5. PRIMARY ACTION (Matches Scanner CTA exactly) -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnLogin"
-            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Login"
-            app:cornerRadius="12dp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/dash_teal"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
-        <!-- 4. SECONDARY ACTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingVertical="16dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.02"
+                    android:text="Login"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="@color/dash_bg" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 6. SECONDARY ACTION -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvForgotPassword"
             android:layout_width="wrap_content"
@@ -108,7 +149,7 @@
             android:padding="8dp"
             android:text="Forgot Password?"
             android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorPrimary" />
+            android:textColor="@color/dash_teal" />
 
     </LinearLayout>
 
