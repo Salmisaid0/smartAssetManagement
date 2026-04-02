@@ -1,74 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    style="?attr/materialCardViewOutlinedStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="6dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/dash_surface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/dash_border"
+    app:strokeWidth="1dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <!-- 1. Avatar Circle (Matches Asset List Style) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardAvatar"
+        <!-- User Initial Circle -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textUserInitial"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:background="@drawable/bg_icon_teal_large"
+            android:gravity="center"
+            android:textColor="@color/dash_teal"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/textInitial"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="?attr/colorOnSurface"
-                tools:text="J" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- 2. User Email -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textUserEmail"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="?attr/colorOnSurface"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textUserRole"
-            app:layout_constraintStart_toEndOf="@+id/cardAvatar"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="john.doe@company.com" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <!-- 3. Role Pill (Secondary Color to contrast Asset Statuses) -->
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textUserRole"
+            <!-- User Name (Using the new Sprint 1 method) -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="@color/dash_text_primary" />
+
+            <!-- User Email -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textUserEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="@color/dash_text_muted" />
+        </LinearLayout>
+
+        <!-- Role Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipUserRole"
+            style="@style/Widget.Material3.Chip.Suggestion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:background="?attr/colorSecondaryContainer"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            android:textColor="?attr/colorOnSecondaryContainer"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="admin_role" />
+            android:clickable="false"
+            android:text="Role" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

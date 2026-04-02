@@ -3,16 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/background">
+    android:background="@color/dash_bg">
 
-    <!-- 1. TOOLBAR -->
+    <!-- 1. TOOLBAR (Themed to dash system) -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        app:background="@color/dash_surface"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="New Asset" />
+        app:navigationIconTint="@color/dash_text_primary"
+        app:title="New Asset"
+        app:titleTextColor="@color/dash_text_primary" />
 
     <!-- 2. SCROLLABLE FORM AREA -->
     <androidx.core.widget.NestedScrollView
@@ -28,29 +31,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="24dp">
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp">
 
-            <!-- SECTION 1 -->
+            <!-- SECTION 1 HEADER (Dashboard Style) -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Asset Details"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
+                android:letterSpacing="0.08"
+                android:text="ASSET DETAILS"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Asset Name *">
+                android:hint="Asset Name *"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -58,28 +68,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Type / Category *">
+                android:hint="Type / Category *"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- SECTION DIVIDER -->
-            <com.google.android.material.divider.MaterialDivider
+            <!-- CUSTOM DIVIDER -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="24dp" />
+                android:layout_height="1dp"
+                android:layout_marginVertical="24dp"
+                android:background="@color/dash_border"
+                android:importantForAccessibility="no" />
 
-            <!-- SECTION 2 -->
+            <!-- SECTION 2 HEADER -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Status and Logistics"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
+                android:letterSpacing="0.08"
+                android:text="STATUS AND LOGISTICS"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/statusDropdownLayout"
@@ -87,13 +106,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Status">
+                android:hint="Status"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
 
                 <AutoCompleteTextView
                     android:id="@+id/spinnerStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -102,42 +126,55 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="Location"
-                app:startIconTint="?attr/colorOnSurfaceVariant">
-
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp"
+                app:startIconTint="@color/dash_text_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- SECTION DIVIDER -->
-            <com.google.android.material.divider.MaterialDivider
+            <!-- CUSTOM DIVIDER -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="24dp" />
+                android:layout_height="1dp"
+                android:layout_marginVertical="24dp"
+                android:background="@color/dash_border"
+                android:importantForAccessibility="no" />
 
-            <!-- SECTION 3 -->
+            <!-- SECTION 3 HEADER -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ownership and Tracking"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
+                android:letterSpacing="0.08"
+                android:text="OWNERSHIP AND TRACKING"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Owner">
+                android:hint="Owner"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputOwner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -145,45 +182,60 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Serial Number">
+                android:hint="Serial Number"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSerial"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- 3. FLOATING FOOTER ACTION -->
+    <!-- 3. FLOATING FOOTER ACTION (Flat dash design) -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        app:cardBackgroundColor="@color/dash_surface"
         app:cardCornerRadius="0dp"
-        app:cardElevation="2dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:strokeColor="@color/dash_border"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Subtle top border -->
-            <com.google.android.material.divider.MaterialDivider
+            <!-- Top border line -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="1dp"
+                android:background="@color/dash_border"
+                android:importantForAccessibility="no" />
 
+            <!-- Styled MaterialButton (Safe for Kotlin .text calls) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveAsset"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginVertical="12dp"
+                android:backgroundTint="@color/dash_teal"
+                android:letterSpacing="0.02"
                 android:text="Save Asset"
-                app:cornerRadius="12dp" />
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="@color/dash_bg"
+                app:cornerRadius="12dp"
+                app:elevation="0dp" />
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

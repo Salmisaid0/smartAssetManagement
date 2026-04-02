@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/background"
+    android:background="@color/dash_bg"
     android:fitsSystemWindows="true">
 
-    <!-- 1. MODERN TOOLBAR (Auto-handles dark mode title/icons) -->
+    <!-- 1. MODERN TOOLBAR (Themed to dash system) -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="@color/dash_surface"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -19,7 +19,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="?attr/homeAsUpIndicator"
-            app:title="Asset Details" />
+            app:navigationIconTint="@color/dash_text_primary"
+            app:title="Asset Details"
+            app:titleTextColor="@color/dash_text_primary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -39,10 +41,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardBackgroundColor="?attr/colorPrimary"
+                android:layout_margin="20dp"
+                app:cardBackgroundColor="@color/dash_teal"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -54,8 +57,9 @@
                         android:id="@+id/textDetailName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:letterSpacing="-0.02"
                         android:textAppearance="?attr/textAppearanceHeadlineLarge"
-                        android:textColor="?attr/colorOnPrimary"
+                        android:textColor="@color/dash_bg"
                         tools:text="Asset Name" />
 
                     <com.google.android.material.textview.MaterialTextView
@@ -65,10 +69,10 @@
                         android:layout_marginTop="4dp"
                         android:alpha="0.8"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnPrimary"
+                        android:textColor="@color/dash_bg"
                         tools:text="ID: IT-001" />
 
-                    <!-- SAFE STATUS PILL (White 20% transparency works on ANY primary color) -->
+                    <!-- SAFE STATUS PILL -->
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipDetailStatus"
                         style="@style/Widget.Material3.Chip.Assist"
@@ -81,7 +85,7 @@
                         app:chipBackgroundColor="#20FFFFFF"
                         app:chipCornerRadius="8dp"
                         app:chipMinHeight="28dp"
-                        android:textColor="?attr/colorOnPrimary"
+                        android:textColor="@color/dash_bg"
                         tools:text="ACTIVE" />
 
                 </LinearLayout>
@@ -89,13 +93,15 @@
 
             <!-- 3. IOT LIVE DATA CARD -->
             <com.google.android.material.card.MaterialCardView
-                style="?attr/materialCardViewFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@color/dash_surface"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                app:strokeColor="@color/dash_border"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -114,7 +120,7 @@
                             android:layout_height="20dp"
                             android:contentDescription="Live Status"
                             android:src="@drawable/bg_status_active"
-                            app:tint="?attr/colorPrimary" />
+                            app:tint="@color/dash_teal" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
@@ -122,7 +128,7 @@
                             android:layout_marginStart="8dp"
                             android:text="Live IoT Status"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="@color/dash_text_primary" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -144,15 +150,17 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                                android:textColor="?attr/colorError"
+                                android:textColor="@color/dash_amber"
                                 tools:text="-- °C" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Temp"
-                                android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
+                                android:letterSpacing="0.06"
+                                android:text="TEMP"
+                                android:textAllCaps="true"
+                                android:textAppearance="?attr/textAppearanceLabelSmall"
+                                android:textColor="@color/dash_text_hint" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -167,15 +175,17 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                                android:textColor="?attr/colorPrimary"
+                                android:textColor="@color/dash_teal"
                                 tools:text="-- %" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Battery"
-                                android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
+                                android:letterSpacing="0.06"
+                                android:text="BATTERY"
+                                android:textAllCaps="true"
+                                android:textAppearance="?attr/textAppearanceLabelSmall"
+                                android:textColor="@color/dash_text_hint" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -190,15 +200,17 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="?attr/textAppearanceTitleSmall"
-                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textColor="@color/dash_text_muted"
                                 tools:text="Offline" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Connection"
-                                android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
+                                android:letterSpacing="0.06"
+                                android:text="STATUS"
+                                android:textAllCaps="true"
+                                android:textAppearance="?attr/textAppearanceLabelSmall"
+                                android:textColor="@color/dash_text_hint" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -211,17 +223,21 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="12dp"
-                android:text="Asset Information"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="?attr/colorOnSurface" />
+                android:letterSpacing="0.08"
+                android:text="ASSET INFORMATION"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
 
             <com.google.android.material.card.MaterialCardView
-                style="?attr/materialCardViewFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
+                app:cardBackgroundColor="@color/dash_surface"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                app:strokeColor="@color/dash_border"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -234,14 +250,16 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Category"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:letterSpacing="0.06"
+                            android:text="CATEGORY"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/textDetailCategory"
@@ -249,16 +267,18 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface"
+                            android:textColor="@color/dash_text_primary"
                             tools:text="N/A" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="24dp"
-                            android:text="Owner"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:letterSpacing="0.06"
+                            android:text="OWNER"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/textDetailOwner"
@@ -266,15 +286,17 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface"
+                            android:textColor="@color/dash_text_primary"
                             tools:text="N/A" />
                     </LinearLayout>
 
                     <!-- Vertical Divider -->
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="wrap_content"
+                    <View
+                        android:layout_width="1dp"
                         android:layout_height="match_parent"
-                        android:layout_marginVertical="16dp" />
+                        android:layout_marginVertical="16dp"
+                        android:background="@color/dash_border"
+                        android:importantForAccessibility="no" />
 
                     <!-- Right Column -->
                     <LinearLayout
@@ -282,14 +304,16 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Serial Number"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:letterSpacing="0.06"
+                            android:text="SERIAL NUMBER"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/textDetailSerial"
@@ -298,16 +322,18 @@
                             android:layout_marginTop="4dp"
                             android:fontFamily="monospace"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface"
+                            android:textColor="@color/dash_text_primary"
                             tools:text="N/A" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="24dp"
-                            android:text="Location"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:letterSpacing="0.06"
+                            android:text="LOCATION"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/textDetailLocation"
@@ -315,7 +341,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface"
+                            android:textColor="@color/dash_text_primary"
                             tools:text="N/A" />
                     </LinearLayout>
 
@@ -325,43 +351,66 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- 5. PREMIUM BOTTOM ACTION BAR -->
+    <!-- 5. PREMIUM BOTTOM ACTION BAR (Flat dash design) -->
     <com.google.android.material.card.MaterialCardView
-        style="?attr/materialCardViewFilledStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        app:cardBackgroundColor="@color/dash_surface"
         app:cardCornerRadius="0dp"
-        app:cardElevation="2dp">
+        app:cardElevation="0dp"
+        app:strokeColor="@color/dash_border"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDelete"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+            <!-- Top border line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/dash_border"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:text="Delete"
-                android:textColor="?attr/colorError"
-                app:cornerRadius="12dp"
-                app:strokeColor="?attr/colorError" />
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEdit"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="Edit Asset"
-                app:cornerRadius="12dp" />
+                <!-- Delete: Amber outline to match destructive pattern -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDelete"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="Delete"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="@color/dash_amber"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="@color/dash_amber"
+                    app:strokeWidth="1dp" />
 
+                <!-- Edit: Teal solid to match primary actions -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEdit"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/dash_teal"
+                    android:text="Edit Asset"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="@color/dash_bg"
+                    app:cornerRadius="12dp"
+                    app:elevation="0dp" />
+
+            </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

@@ -115,11 +115,9 @@ class DashboardFragment : Fragment() {
             adapter = historyAdapter
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.scanHistory.collectLatest { list ->
                 historyAdapter.submitList(list)
-
-                // Afficher/Masquer l'état vide proprement
                 binding.layoutEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
                 binding.rvDashboardHistory.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
             }
