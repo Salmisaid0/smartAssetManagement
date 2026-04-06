@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/dash_surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/dash_border"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Scan Order Number -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textScanOrder"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:background="@drawable/bg_icon_teal"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            android:textColor="@color/dash_bg" />
+
+        <!-- Asset Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textAssetName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="@color/dash_text_primary" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textAssetType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/dash_text_muted" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textAssetSerial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.02"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
+        </LinearLayout>
+
+        <!-- Wrong Room Warning -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipWrongRoom"
+            style="@style/Widget.Material3.Chip.Suggestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Wrong Room"
+            android:visibility="gone"
+            android:textColor="@color/on_error_container"
+            app:chipBackgroundColor="@color/error_container"
+            app:chipStrokeWidth="0dp" />
+
+        <!-- Check Icon -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_warning"
+            app:tint="@color/dash_teal" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

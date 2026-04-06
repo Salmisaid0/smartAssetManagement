@@ -17,51 +17,109 @@
         android:label="Assets"
         tools:layout="@layout/fragment_assets">
 
-    <action
-        android:id="@+id/action_assetsFragment_to_assetDetailFragment"
-        app:destination="@id/assetDetailFragment" />
+        <argument
+            android:name="roomId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
 
-    <action
-        android:id="@+id/action_assetsFragment_to_addAssetFragment"
-        app:destination="@id/addAssetFragment" />
+        <action
+            android:id="@+id/action_assetsFragment_to_assetDetailFragment"
+            app:destination="@id/assetDetailFragment" />
 
-</fragment>
+        <action
+            android:id="@+id/action_assetsFragment_to_addAssetFragment"
+            app:destination="@id/addAssetFragment" />
 
-<fragment
-android:id="@+id/navigation_scanner"
-android:name="com.etachi.smartassetmanagement.ui.scanner.ScannerFragment"
-android:label="Scanner"
-tools:layout="@layout/fragment_scanner" />
+    </fragment>
 
-<fragment
-android:id="@+id/navigation_profile"
-android:name="com.etachi.smartassetmanagement.ui.profile.ProfileFragment"
-android:label="Profile"
-tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/navigation_scanner"
+        android:name="com.etachi.smartassetmanagement.ui.scanner.ScannerFragment"
+        android:label="Scanner"
+        tools:layout="@layout/fragment_scanner" />
 
-<fragment
-android:id="@+id/assetDetailFragment"
-android:name="com.etachi.smartassetmanagement.ui.detail.AssetDetailFragment"
-android:label="Asset Detail"
-tools:layout="@layout/fragment_asset_detail">
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.etachi.smartassetmanagement.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
 
-<argument
-    android:name="assetId"
-    app:argType="string" />
-</fragment>
+    <fragment
+        android:id="@+id/assetDetailFragment"
+        android:name="com.etachi.smartassetmanagement.ui.detail.AssetDetailFragment"
+        android:label="Asset Detail"
+        tools:layout="@layout/fragment_asset_detail">
+        <argument
+            android:name="assetId"
+            app:argType="string" />
+    </fragment>
 
-    <!-- 6. Add Asset -->
-<fragment
-android:id="@+id/addAssetFragment"
-android:name="com.etachi.smartassetmanagement.ui.detail.AddAssetFragment"
-android:label="Add Asset"
-tools:layout="@layout/fragment_add_asset">
+    <fragment
+        android:id="@+id/addAssetFragment"
+        android:name="com.etachi.smartassetmanagement.ui.detail.AddAssetFragment"
+        android:label="Add Asset"
+        tools:layout="@layout/fragment_add_asset">
+        <argument
+            android:name="assetObj"
+            app:argType="com.etachi.smartassetmanagement.data.model.Asset"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 
-<argument
-    android:name="assetObj"
-    app:argType="com.etachi.smartassetmanagement.data.model.Asset"
-    app:nullable="true"
-    android:defaultValue="@null" />
+    <fragment
+        android:id="@+id/inventoryRoomScanFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryRoomScanFragment"
+        android:label="Scan Room">
+        <action
+            android:id="@+id/action_roomScan_to_assetScanning"
+            app:destination="@id/inventoryAssetScanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
-</fragment>
-    </navigation>
+    <fragment
+        android:id="@+id/inventoryAssetScanFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryAssetScanFragment"
+        android:label="Scan Assets">
+        <argument
+            android:name="sessionId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_assetScanning_to_missingAssets"
+            app:destination="@id/inventoryMissingAssetsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inventoryMissingAssetsFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryMissingAssetsFragment"
+        android:label="Missing Assets">
+        <argument
+            android:name="sessionId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inventoryHistoryFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryHistoryFragment"
+        android:label="Inventory History" />
+
+    <fragment
+        android:id="@+id/navigation_orgchart"
+        android:name="com.etachi.smartassetmanagement.ui.orgchart.OrganigramFragment"
+        android:label="Locations"
+        tools:layout="@layout/fragment_organigram">
+        <action
+            android:id="@+id/action_organigram_to_assets"
+            app:destination="@id/navigation_assets"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+</navigation>

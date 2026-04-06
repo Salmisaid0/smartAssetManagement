@@ -86,6 +86,7 @@ class UserManagementActivity : AppCompatActivity() {
         override fun getItemCount(): Int = users.size
     }
 
+
     private fun showRoleSelectionDialog(user: User) {
         lifecycleScope.launch {
             roleViewModel.roles.collectLatest { roles ->

@@ -38,10 +38,24 @@ class AssetRepository @Inject constructor(
         }
         awaitClose { listener.remove() }
     }
+    suspend fun getAssetByQrCode(qrCode: String): Asset? {
+        val snapshot = assetsCollection
+            .whereEqualTo("qrCode", qrCode)
+            .limit(1)
+            .get()
+            .await()
+
+        return snapshot.documents.firstOrNull()?.let { doc ->
+            doc.toObject(Asset::class.java)?.copy(id = doc.id)
+        }
+    }
+
+
 
     suspend fun updateAsset(asset: Asset) {
         assetsCollection.document(asset.id).set(asset).await()
     }
+
 
     fun searchAssets(query: String): Flow<List<Asset>> = callbackFlow {
         val listener = assetsCollection.addSnapshotListener { snapshot, error ->
@@ -82,6 +96,16 @@ class AssetRepository @Inject constructor(
         )
 
         historyCollection.add(historyEntry).await()
+    }
+    fun getAssetsByRoom(roomId: String): Flow<List<Asset>> = callbackFlow {
+        val listener = assetsCollection
+            .whereEqualTo("roomId", roomId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val assets = snapshot?.documents?.mapNotNull { it.toObject(Asset::class.java)?.copy(id = it.id) } ?: emptyList()
+                trySend(assets)
+            }
+        awaitClose { listener.remove() }
     }
 
     fun getScanHistory(): Flow<List<ScanHistory>> = callbackFlow {

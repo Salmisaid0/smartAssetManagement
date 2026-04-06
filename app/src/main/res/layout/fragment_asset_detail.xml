@@ -7,7 +7,7 @@
     android:background="@color/dash_bg"
     android:fitsSystemWindows="true">
 
-    <!-- 1. MODERN TOOLBAR (Themed to dash system) -->
+    <!-- 1. TOOLBAR -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,7 +22,6 @@
             app:navigationIconTint="@color/dash_text_primary"
             app:title="Asset Details"
             app:titleTextColor="@color/dash_text_primary" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -35,15 +34,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="20dp">
 
-            <!-- 2. DYNAMIC HEADER CARD -->
+            <!-- 2. HEADER CARD (Teal wrapper) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
                 app:cardBackgroundColor="@color/dash_teal"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -51,7 +52,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="20dp">
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/textDetailName"
@@ -72,13 +73,12 @@
                         android:textColor="@color/dash_bg"
                         tools:text="ID: IT-001" />
 
-                    <!-- SAFE STATUS PILL -->
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipDetailStatus"
                         style="@style/Widget.Material3.Chip.Assist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="12dp"
                         android:clickable="false"
                         android:textAllCaps="true"
                         android:textAppearance="?attr/textAppearanceLabelMedium"
@@ -87,142 +87,215 @@
                         app:chipMinHeight="28dp"
                         android:textColor="@color/dash_bg"
                         tools:text="ACTIVE" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 3. IOT LIVE DATA CARD -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- 3. IOT DATA (NOW EXACTLY DASHBOARD STAT CARDS) -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="20dp"
-                app:cardBackgroundColor="@color/dash_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/dash_border"
-                app:strokeWidth="1dp">
+                android:layout_marginTop="28dp"
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <!-- Temp Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:contentDescription="Live Status"
-                            android:src="@drawable/bg_status_active"
-                            app:tint="@color/dash_teal" />
-
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Live IoT Status"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/dash_text_primary" />
-                    </LinearLayout>
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/dash_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/dash_border"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:orientation="horizontal"
-                        android:weightSum="3">
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="12dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="2dp"
+                            android:background="@color/dash_amber"
+                            android:importantForAccessibility="no" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/textTemp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
+                            android:layout_marginTop="8dp"
+                            android:importantForAccessibility="no"
+                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                            android:textColor="@color/dash_text_primary"
+                            tools:text="-- °C" />
 
-                            <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/textTemp"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                                android:textColor="@color/dash_amber"
-                                tools:text="-- °C" />
-
-                            <com.google.android.material.textview.MaterialTextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:letterSpacing="0.06"
-                                android:text="TEMP"
-                                android:textAllCaps="true"
-                                android:textAppearance="?attr/textAppearanceLabelSmall"
-                                android:textColor="@color/dash_text_hint" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
+                            android:layout_marginTop="2dp"
+                            android:importantForAccessibility="no"
+                            android:letterSpacing="0.07"
+                            android:text="Temp"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
 
-                            <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/textBattery"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                                android:textColor="@color/dash_teal"
-                                tools:text="-- %" />
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@color/dash_border"
+                            android:importantForAccessibility="no">
 
-                            <com.google.android.material.textview.MaterialTextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:letterSpacing="0.06"
-                                android:text="BATTERY"
-                                android:textAllCaps="true"
-                                android:textAppearance="?attr/textAppearanceLabelSmall"
-                                android:textColor="@color/dash_text_hint" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/textStatus"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAppearance="?attr/textAppearanceTitleSmall"
-                                android:textColor="@color/dash_text_muted"
-                                tools:text="Offline" />
-
-                            <com.google.android.material.textview.MaterialTextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:letterSpacing="0.06"
-                                android:text="STATUS"
-                                android:textAllCaps="true"
-                                android:textAppearance="?attr/textAppearanceLabelSmall"
-                                android:textColor="@color/dash_text_hint" />
-                        </LinearLayout>
-
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@color/dash_amber_surface" />
+                        </FrameLayout>
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- 4. INFO GRID SECTION -->
+                <!-- Battery Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/dash_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/dash_border"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="12dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="2dp"
+                            android:background="@color/dash_teal"
+                            android:importantForAccessibility="no" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/textBattery"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:importantForAccessibility="no"
+                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                            android:textColor="@color/dash_text_primary"
+                            tools:text="-- %" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:importantForAccessibility="no"
+                            android:letterSpacing="0.07"
+                            android:text="Battery"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@color/dash_border"
+                            android:importantForAccessibility="no">
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@color/dash_teal_surface" />
+                        </FrameLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Connection Status Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/dash_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/dash_border"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="12dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="2dp"
+                            android:background="@color/dash_blue"
+                            android:importantForAccessibility="no" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/textStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:importantForAccessibility="no"
+                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                            android:textColor="@color/dash_text_primary"
+                            tools:text="Offline" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:importantForAccessibility="no"
+                            android:letterSpacing="0.07"
+                            android:text="Status"
+                            android:textAllCaps="true"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="@color/dash_text_hint" />
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@color/dash_border"
+                            android:importantForAccessibility="no">
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@color/dash_blue_surface" />
+                        </FrameLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- 4. INFO GRID SECTION (Dashboard style headers) -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginTop="28dp"
                 android:letterSpacing="0.08"
                 android:text="ASSET INFORMATION"
                 android:textAllCaps="true"
@@ -232,7 +305,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="8dp"
                 app:cardBackgroundColor="@color/dash_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
@@ -269,6 +342,13 @@
                             android:textAppearance="?attr/textAppearanceBodyLarge"
                             android:textColor="@color/dash_text_primary"
                             tools:text="N/A" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="24dp"
+                            android:background="@color/dash_border"
+                            android:importantForAccessibility="no" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
@@ -325,6 +405,13 @@
                             android:textColor="@color/dash_text_primary"
                             tools:text="N/A" />
 
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="24dp"
+                            android:background="@color/dash_border"
+                            android:importantForAccessibility="no" />
+
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -351,7 +438,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- 5. PREMIUM BOTTOM ACTION BAR (Flat dash design) -->
+    <!-- 5. PREMIUM BOTTOM ACTION BAR -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -367,7 +454,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Top border line -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -380,7 +466,6 @@
                 android:orientation="horizontal"
                 android:padding="16dp">
 
-                <!-- Delete: Amber outline to match destructive pattern -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDelete"
                     style="@style/Widget.Material3.Button.OutlinedButton"
@@ -395,7 +480,6 @@
                     app:strokeColor="@color/dash_amber"
                     app:strokeWidth="1dp" />
 
-                <!-- Edit: Teal solid to match primary actions -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEdit"
                     style="@style/Widget.Material3.Button"
@@ -409,7 +493,6 @@
                     android:textColor="@color/dash_bg"
                     app:cornerRadius="12dp"
                     app:elevation="0dp" />
-
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

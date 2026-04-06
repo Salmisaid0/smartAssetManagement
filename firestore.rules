@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getPermissions() {
+      return exists(/databases/$(database)/documents/roles/$(getUserData().roleId)) 
+        ? get(/databases/$(database)/documents/roles/$(getUserData().roleId)).data.permissions 
+        : [];
+    }
+
+  
+
+
+    match /assets/{assetId} {
+      allow read: if isSignedIn() && hasPermission('asset_view');
+      allow create: if isSignedIn() && hasPermission('asset_create');
+      allow update: if isSignedIn() && hasPermission('asset_edit');
+      allow delete: if isSignedIn() && hasPermission('asset_delete');
+    }
+
+    match /scan_history/{docId} {
+      allow read: if isSignedIn() && hasPermission('asset_view');
+      allow create: if isSignedIn() && hasPermission('scan_identify');
+    }
+
+    match /roles/{roleId} {
+      allow read: if isSignedIn();
+      
+      allow create: if isSignedIn() && roleId == 'admin_role';
+      
+      allow update, delete: if isSignedIn() && hasPermission('role_manage');
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || hasPermission('user_manage'));
+    }
+    match /directions/{directionId} {
+      allow read: if isAuthenticated() && hasAnyRole(['admin_role', 'tech_role', 'viewer_role']);
+      allow write: if isAuthenticated() && hasRole('admin_role');
+      
+      match /departments/{departmentId} {
+        allow read: if isAuthenticated() && hasAnyRole(['admin_role', 'tech_role', 'viewer_role']);
+        allow write: if isAuthenticated() && hasRole('admin_role');
+        
+        match /rooms/{roomId} {
+          allow read: if isAuthenticated() && hasAnyRole(['admin_role', 'tech_role', 'viewer_role']);
+          allow write: if isAuthenticated() && hasRole('admin_role');
+        }
+      }
+    }
+    
+    match /inventory_sessions/{sessionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.auditorId == request.auth.uid ||
+        hasRole('admin_role')
+      );
+      
+      allow create: if isAuthenticated() && 
+                    hasPermission('scan_audit') &&
+                    request.resource.data.auditorId == request.auth.uid &&
+                    validSessionData(request.resource.data);
+      
+      allow update: if isAuthenticated() && (
+        resource.data.auditorId == request.auth.uid ||
+        hasRole('admin_role')
+      ) && validSessionUpdate(request.resource.data, resource.data);
+      
+      allow delete: if isAuthenticated() && hasRole('admin_role');
+      
+      match /scans/{scanId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && 
+                      hasPermission('scan_audit') &&
+                      request.resource.data.sessionId == sessionId;
+        allow update, delete: if false; // Scans are immutable
+      }
+    }
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function hasRole(roleId) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == roleId;
+    }
+    
+    function hasAnyRole(roleIds) {
+      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId;
+      return userRole in roleIds;
+    }
+    
+    function hasPermission(permissionKey) {
+      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId;
+      let roleDoc = get(/databases/$(database)/documents/roles/$(userRole));
+      return permissionKey in roleDoc.data.permissions;
+    }
+    
+    function validSessionData(data) {
+      return data.auditorId is string &&
+             data.roomId is string &&
+             data.status in ['PENDING', 'IN_PROGRESS', 'COMPLETED'] &&
+             data.expectedAssetCount is int &&
+             data.scannedAssetCount is int &&
+             data.missingAssetCount is int;
+    }
+    
+    function validSessionUpdate(newData, oldData) {
+      return newData.auditorId == oldData.auditorId && // Can't change auditor
+             newData.roomId == oldData.roomId &&       // Can't change room
+             newData.status in ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
+    }
+  }
+}

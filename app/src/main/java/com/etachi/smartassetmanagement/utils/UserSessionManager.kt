@@ -16,8 +16,14 @@ class UserSessionManager @Inject constructor() {
         this.permissionKeys = permissionKeys.toHashSet()
     }
 
-    // The function name must match the call in AssetRepository
     fun getCurrentUser(): User? = currentUser
+
+    /**
+     * FIX: Added getCurrentUserName() — called by AssetViewModel.checkInAsset().
+     * Returns the user's email as their display name since the User model
+     * does not have a separate "name" field (only uid, email, roleId).
+     */
+    fun getCurrentUserName(): String? = currentUser?.email
 
     fun hasPermission(permission: Permission): Boolean {
         if (currentUser == null) return false

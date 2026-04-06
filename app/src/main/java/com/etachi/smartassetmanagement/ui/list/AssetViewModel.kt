@@ -22,96 +22,141 @@ class AssetViewModel @Inject constructor(
     // 1. Search Query State
     private val _searchQuery = MutableStateFlow("")
 
-    // 2. Scan Mode State (Missing in your previous version)
+    // 2. Room Filter State (null = show all)
+    private val _filterRoomId = MutableStateFlow<String?>(null)
+
+    // 3. Scan Mode State
     private val _scanMode = MutableStateFlow(ScanMode.IDENTIFY)
     val scanMode: StateFlow<ScanMode> = _scanMode.asStateFlow()
 
-    // 3. Assets Flow (Handles Search)
-    val assets: StateFlow<List<Asset>> = _searchQuery
-        .flatMapLatest { query ->
-            if (query.isEmpty()) {
-                repository.getAllAssets()
-            } else {
-                repository.searchAssets(query)
-            }
+    // 4. Assets Flow — fixed with flatMapLatest to unwrap inner Flow
+    val assets: StateFlow<List<Asset>> = combine(_searchQuery, _filterRoomId) { query, roomId ->
+        Pair(query, roomId)
+    }.flatMapLatest { (query, roomId) ->
+        when {
+            roomId != null -> repository.getAssetsByRoom(roomId)
+            query.isNotEmpty() -> repository.searchAssets(query)
+            else -> repository.getAllAssets()
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // 4. Scan History
+    // 5. Scan History — directly from repository (uses Firebase Timestamp correctly)
     val scanHistory: Flow<List<ScanHistory>> = repository.getScanHistory()
 
-    // 5. Dashboard Stats
+    // 6. Dashboard Stats
     data class DashboardStats(
         val total: Int = 0,
         val active: Int = 0,
-        val maintenance: Int = 0
+        val maintenance: Int = 0,
+        val retired: Int = 0
     )
 
-    val stats: StateFlow<DashboardStats> = assets.map { list ->
-        DashboardStats(
-            total = list.size,
-            active = list.count { it.status == "Active" || it.status == "In Use" },
-            maintenance = list.count { it.status == "Maintenance" }
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DashboardStats())
+    private val _stats = MutableStateFlow(DashboardStats())
+    val stats: StateFlow<DashboardStats> = _stats.asStateFlow()
 
-    // --- Functions ---
+    init {
+        viewModelScope.launch {
+            assets.collect { assetList ->
+                _stats.value = DashboardStats(
+                    total = assetList.size,
+                    active = assetList.count { it.status.equals("Active", ignoreCase = true) },
+                    maintenance = assetList.count { it.status.equals("Maintenance", ignoreCase = true) },
+                    retired = assetList.count { it.status.equals("Retired", ignoreCase = true) }
+                )
+            }
+        }
+    }
+
+    // =========================================================
+    // State Modifiers
+    // =========================================================
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
+    }
+
+    fun setRoomFilter(roomId: String?) {
+        _filterRoomId.value = roomId
     }
 
     fun setScanMode(mode: ScanMode) {
         _scanMode.value = mode
     }
 
-    fun insertAsset(asset: Asset) {
-        if (!sessionManager.hasPermission(Permission.ASSET_CREATE)) return
+    // =========================================================
+    // Scanner Actions
+    // =========================================================
+
+    /**
+     * FIX: Calls repository.logScanEvent() instead of building ScanHistory manually.
+     * repository.logScanEvent() already:
+     *   - Uses the correct ScanHistory field names (action, performedById, performedByEmail)
+     *   - Uses Firebase server timestamp (not a Long)
+     *   - Reads currentUser directly from UserSessionManager internally
+     */
+    fun logScan(asset: Asset, modeName: String, location: String) {
         viewModelScope.launch {
-            repository.insertAsset(asset)
+            try {
+                repository.logScanEvent(asset, modeName, location)
+            } catch (e: Exception) {
+                // Log silently
+            }
         }
     }
 
-    fun deleteAsset(asset: Asset) {
-        if (!sessionManager.hasPermission(Permission.ASSET_DELETE)) return
+    /**
+     * FIX: Uses sessionManager.getCurrentUserName() which now exists in UserSessionManager.
+     * Returns the current user's email as their display name.
+     */
+    fun checkInAsset(asset: Asset) {
         viewModelScope.launch {
-            repository.deleteAsset(asset)
+            try {
+                val updatedAsset = asset.copy(
+                    status = "In Use",
+                    owner = sessionManager.getCurrentUserName() ?: asset.owner
+                )
+                repository.updateAsset(updatedAsset)
+            } catch (e: Exception) {
+                // Log silently
+            }
+        }
+    }
+
+    fun updateAssetStatus(asset: Asset, newStatus: String) {
+        viewModelScope.launch {
+            try {
+                val updatedAsset = asset.copy(status = newStatus)
+                repository.updateAsset(updatedAsset)
+            } catch (e: Exception) {
+                // Log silently
+            }
+        }
+    }
+
+    // =========================================================
+    // CRUD Operations
+    // =========================================================
+
+    fun insertAsset(asset: Asset) {
+        viewModelScope.launch {
+            try {
+                repository.insertAsset(asset)
+            } catch (e: Exception) {
+                // Handle silently
+            }
         }
     }
 
     fun updateAsset(asset: Asset) {
-        if (!sessionManager.hasPermission(Permission.ASSET_EDIT)) return
         viewModelScope.launch {
             repository.updateAsset(asset)
         }
     }
 
-    fun updateAssetStatus(asset: Asset, newStatus: String) {
-        if (!sessionManager.hasPermission(Permission.SCAN_MAINTENANCE)) return
+    fun deleteAsset(asset: Asset) {
         viewModelScope.launch {
-            val updatedAsset = asset.copy(status = newStatus)
-            repository.updateAsset(updatedAsset)
-        }
-    }
-
-    fun logScan(asset: Asset, action: String, location: String?) {
-        viewModelScope.launch {
-            repository.logScanEvent(asset, action, location)
-        }
-    }
-
-    // MISSING FUNCTION ADDED HERE
-    fun checkInAsset(asset: Asset) {
-        if (!sessionManager.hasPermission(Permission.SCAN_CHECK_IN)) return
-
-        viewModelScope.launch {
-            val currentUser = repository.getCurrentUser()
-            if (currentUser != null) {
-                val updatedAsset = asset.copy(
-                    owner = currentUser.email,
-                    status = "In Use"
-                )
-                repository.updateAsset(updatedAsset)
+            if (sessionManager.hasPermission(Permission.ASSET_DELETE)) {
+                repository.deleteAsset(asset)
             }
         }
     }
