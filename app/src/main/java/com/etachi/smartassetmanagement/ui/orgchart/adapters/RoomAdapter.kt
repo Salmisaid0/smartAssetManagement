@@ -4,8 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.etachi.smartassetmanagement.databinding.ItemRoomBinding
-import com.etachi.smartassetmanagement.ui.orgchart.UiRoom
-
+import com.etachi.smartassetmanagement.ui.organigram.UiRoom
 class RoomAdapter(private val onRoomClick: (String, String) -> Unit) : RecyclerView.Adapter<RoomAdapter.VH>() {
     private var items: List<UiRoom> = emptyList()
 

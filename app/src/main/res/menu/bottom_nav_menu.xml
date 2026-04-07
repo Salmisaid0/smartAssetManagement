@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/navigation_dashboard"
-        android:icon="@android:drawable/ic_menu_view"
-        android:title="Dashboard"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/dashboard_layout_svgrepo_com__1_"
+        android:title="Dashboard" />
 
     <item
-        android:id="@+id/navigation_orgchart"
-        android:icon="@drawable/group_svgrepo_com"
-        android:title="Locations"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/navigation_assets"
+        android:icon="@drawable/ic_asset"
+        android:title="Assets" />
 
     <item
-        android:id="@+id/navigation_scanner"
-        android:icon="@drawable/qr_code_svgrepo_com"
-        android:title="Scanner"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/navigation_organigram"
+        android:icon="@drawable/ic_organigrame"
+        android:title="Locations" />
+
+    <!-- ✅ ADDED: Inventory tab -->
+    <item
+        android:id="@+id/navigation_inventory"
+        android:icon="@drawable/ic_inventory"
+        android:iconTint="@color/dash_chip_bg_state"
+        android:title="Inventory" />
 
     <item
         android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_person"
-        android:title="Profile"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
 
 </menu>

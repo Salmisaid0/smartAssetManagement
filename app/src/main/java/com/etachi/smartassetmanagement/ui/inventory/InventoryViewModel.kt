@@ -2,88 +2,137 @@ package com.etachi.smartassetmanagement.ui.inventory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.etachi.smartassetmanagement.data.model.Asset
-import com.etachi.smartassetmanagement.domain.model.*
+import com.etachi.smartassetmanagement.domain.model.InventoryScan
+import com.etachi.smartassetmanagement.domain.model.InventorySession
+import com.etachi.smartassetmanagement.domain.model.MissingAsset
+import com.etachi.smartassetmanagement.domain.model.Resource
 import com.etachi.smartassetmanagement.domain.repository.InventoryRepository
-import com.etachi.smartassetmanagement.domain.usecase.inventory.*
+import com.etachi.smartassetmanagement.domain.repository.LocationRepository
+import com.etachi.smartassetmanagement.domain.usecase.inventory.ScanAssetUseCase
+import com.etachi.smartassetmanagement.utils.UserSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
+// ✅ Updated State to include Asset Scanning properties
 data class InventoryUiState(
     val isLoading: Boolean = false,
     val session: InventorySession? = null,
-    val scannedAssets: List<InventoryScan> = emptyList(),
-    val expectedAssets: List<Asset> = emptyList(),
-    val missingAssets: List<MissingAsset> = emptyList(),
-    val lastScanResult: ScanAssetUseCase.ScanResult? = null,
+    val roomName: String? = null,
     val error: String? = null,
-    val showMissingDialog: Boolean = false
+
+    // Properties required by InventoryAssetScanFragment
+    val scannedAssets: List<InventoryScan> = emptyList(),
+    val lastScanResult: ScanAssetUseCase.ScanResult? = null,
+    val showMissingDialog: Boolean = false,
+    val missingAssets: List<MissingAsset> = emptyList()
 )
+
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
-    private val startSessionUseCase: StartInventorySessionUseCase,
-    private val scanAssetUseCase: ScanAssetUseCase,
-    private val getMissingAssetsUseCase: GetMissingAssetsUseCase,
-    private val completeSessionUseCase: CompleteInventorySessionUseCase,
-    private val inventoryRepository: InventoryRepository
+    private val inventoryRepository: InventoryRepository,
+    private val locationRepository: LocationRepository,
+    private val userSessionManager: UserSessionManager,
+    private val scanAssetUseCase: ScanAssetUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(InventoryUiState())
     val uiState: StateFlow<InventoryUiState> = _uiState.asStateFlow()
 
-    private var currentSessionId: String? = null
+    // Keep track of the current session ID for asset scanning
+    private var currentSessionId: String = ""
 
+    // ==========================================
+    // ROOM SCANNING LOGIC (Existing)
+    // ==========================================
+
+    fun validateAndStartSession(qrCode: String) {
+        if (!qrCode.startsWith("ROOM-")) {
+            _uiState.update { it.copy(error = "Invalid QR Code. Please scan a Room QR code.") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+
+            try {
+                val room = locationRepository.getRoomByQrCode(qrCode)
+                if (room == null) {
+                    _uiState.update { it.copy(isLoading = false, error = "Room not found in database.") }
+                    return@launch
+                }
+
+                val expectedAssets = inventoryRepository.getRoomExpectedAssets(room.id)
+                val currentUser = userSessionManager.getCurrentUser()
+
+                if (currentUser == null) {
+                    _uiState.update { it.copy(isLoading = false, error = "User not authenticated.") }
+                    return@launch
+                }
+
+                val result = inventoryRepository.startSession(
+                    roomId = room.id,
+                    roomName = room.name,
+                    roomPath = room.fullPath,
+                    departmentId = room.departmentId,
+                    directionId = room.directionId,
+                    expectedAssetCount = expectedAssets.size,
+                    auditorId = currentUser.uid,
+                    auditorEmail = currentUser.email ?: "",
+                    auditorName = currentUser.email?.substringBefore("@") ?: "Unknown"
+                )
+
+                when (result) {
+                    is Resource.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                session = result.data,
+                                roomName = room.name
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        _uiState.update { it.copy(isLoading = false, error = result.message) }
+                    }
+                    else -> {}
+                }
+
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to start session")
+                _uiState.update { it.copy(isLoading = false, error = "Network error: ${e.message}") }
+            }
+        }
+    }
+
+    fun clearSessionState() {
+        _uiState.update { it.copy(session = null) }
+    }
+
+    // ==========================================
+    // ASSET SCANNING LOGIC (Newly Added)
+    // ==========================================
 
     fun loadExistingSession(sessionId: String) {
         currentSessionId = sessionId
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-
-            val session = inventoryRepository.getSession(sessionId)
-            if (session != null) {
-                _uiState.update { it.copy(isLoading = false, session = session) }
-                observeSession(sessionId)
-                observeScans(sessionId)
-            } else {
-                _uiState.update { it.copy(isLoading = false, error = "Session not found") }
-            }
-        }
-    }
-
-    fun startSession(roomQrCode: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-
-            when (val result = startSessionUseCase(roomQrCode)) {
-                is Resource.Success -> {
-                    currentSessionId = result.data.id
-                    _uiState.update { it.copy(isLoading = false, session = result.data) }
-                    observeSession(result.data.id)
-                    observeScans(result.data.id)
+            try {
+                // Observe session for live progress updates
+                inventoryRepository.observeSession(sessionId).collect { session ->
+                    _uiState.update { it.copy(isLoading = false, session = session) }
                 }
-                is Resource.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.message) }
-                }
-                else -> {}
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load session") }
             }
         }
-    }
 
-    private fun observeSession(sessionId: String) {
-        viewModelScope.launch {
-            inventoryRepository.observeSession(sessionId).collect { session ->
-                // ✅ FIXED: Was copying itself instead of new session
-                session?.let { _uiState.update { state -> state.copy(session = session) } }
-            }
-        }
-    }
-
-    /**
-     * ✅ ADDED: Observe scans in real-time
-     */
-    private fun observeScans(sessionId: String) {
+        // Observe scanned assets list
         viewModelScope.launch {
             inventoryRepository.getSessionScans(sessionId).collect { scans ->
                 _uiState.update { it.copy(scannedAssets = scans) }
@@ -91,62 +140,47 @@ class InventoryViewModel @Inject constructor(
         }
     }
 
-    fun processAssetScan(assetQrCode: String) {
-        val sessionId = currentSessionId ?: run {
-            _uiState.update { it.copy(error = "No active session") }
-            return
-        }
-
+    fun processAssetScan(barcode: String) {
         viewModelScope.launch {
-            when (val result = scanAssetUseCase(sessionId, assetQrCode)) {
-                is ScanAssetUseCase.ScanResult.Success -> {
-                    _uiState.update { it.copy(lastScanResult = result) }
-                    kotlinx.coroutines.delay(2000)
-                    _uiState.update { it.copy(lastScanResult = null) }
-                }
-                is ScanAssetUseCase.ScanResult.Duplicate -> {
-                    _uiState.update { it.copy(lastScanResult = result) }
-                    kotlinx.coroutines.delay(2000)
-                    _uiState.update { it.copy(lastScanResult = null) }
-                }
-                is ScanAssetUseCase.ScanResult.WrongRoom -> {
-                    _uiState.update { it.copy(lastScanResult = result) }
-                    kotlinx.coroutines.delay(3000)
-                    _uiState.update { it.copy(lastScanResult = null) }
-                }
-                is ScanAssetUseCase.ScanResult.AssetNotFound -> {
-                    _uiState.update { it.copy(error = "Asset not found") }
-                }
-                is ScanAssetUseCase.ScanResult.Error -> {
-                    _uiState.update { it.copy(error = result.message) }
-                }
-                else -> {}
+            try {
+                // ⚠️ NOTE: If your ScanAssetUseCase uses a different method name
+                // (like "scan" instead of "execute"), change it below.
+                // Also, if it only takes "barcode", remove "currentSessionId".
+                val result = scanAssetUseCase.execute(currentSessionId, barcode)
+
+                _uiState.update { it.copy(lastScanResult = result) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
             }
         }
     }
 
-    fun completeSession(notes: String = "") {
-        val sessionId = currentSessionId ?: return
-
+    fun completeSession() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val result = inventoryRepository.completeSession(currentSessionId, "")
 
-            when (val result = completeSessionUseCase(sessionId, notes)) {
-                is Resource.Success -> {
-                    val missingResult = getMissingAssetsUseCase(sessionId)
+                if (result is Resource.Success) {
+                    // Fetch missing assets to show in the dialog
+                    val missing = inventoryRepository.getMissingAssets(currentSessionId)
                     _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            session = result.data,
-                            missingAssets = missingResult.missingAssets,
-                            showMissingDialog = true
-                        )
+                        it.copy(showMissingDialog = true, missingAssets = missing)
                     }
+                } else if (result is Resource.Error) {
+                    _uiState.update { it.copy(error = result.message) }
                 }
-                is  Resource.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.message) }
-                }
-                else -> {}
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Failed to complete session") }
+            }
+        }
+    }
+
+    fun cancelSession() {
+        viewModelScope.launch {
+            try {
+                inventoryRepository.cancelSession(currentSessionId)
+            } catch (e: Exception) {
+                // Ignore errors on cancel
             }
         }
     }
@@ -155,20 +189,7 @@ class InventoryViewModel @Inject constructor(
         _uiState.update { it.copy(showMissingDialog = false) }
     }
 
-    fun cancelSession() {
-        val sessionId = currentSessionId ?: return
-        viewModelScope.launch {
-            inventoryRepository.cancelSession(sessionId)
-            resetState()
-        }
-    }
-
     fun clearError() {
         _uiState.update { it.copy(error = null) }
-    }
-
-    fun resetState() {
-        currentSessionId = null
-        _uiState.value = InventoryUiState()
     }
 }

@@ -9,19 +9,19 @@ import kotlinx.coroutines.flow.Flow
 
 interface InventoryRepository {
 
-    /**
-     * Get all sessions for a specific user.
-     */
+    // ─── Session Queries ─────────────────────────────────────────────
+
     fun getUserSessions(userId: String): Flow<List<InventorySession>>
 
     fun getRoomSessions(roomId: String): Flow<List<InventorySession>>
 
-    /**
-     * Get active sessions for a specific user.
-     */
     suspend fun getActiveSessions(auditorId: String): List<InventorySession>
 
     suspend fun getSession(sessionId: String): InventorySession?
+
+    fun observeSession(sessionId: String): Flow<InventorySession?>
+
+    // ─── Session Lifecycle ───────────────────────────────────────────
 
     suspend fun startSession(
         roomId: String,
@@ -39,7 +39,11 @@ interface InventoryRepository {
 
     suspend fun cancelSession(sessionId: String): Resource<Unit>
 
+    // ─── Scan Operations ────────────────────────────────────────────
+
     fun getSessionScans(sessionId: String): Flow<List<InventoryScan>>
+
+    suspend fun isAssetScanned(sessionId: String, assetId: String): Boolean
 
     suspend fun recordScan(
         sessionId: String,
@@ -51,19 +55,11 @@ interface InventoryRepository {
         expectedRoomId: String
     ): Resource<InventoryScan>
 
-    suspend fun isAssetScanned(sessionId: String, assetId: String): Boolean
+    // ─── Asset Lookup ───────────────────────────────────────────────
 
-    /**
-     * Get all expected assets for a room - one shot.
-     */
     suspend fun getRoomExpectedAssets(roomId: String): List<Asset>
 
-    /**
-     * Get all expected assets for a room - realtime flow.
-     */
     fun getRoomAssetsFlow(roomId: String): Flow<List<Asset>>
 
     suspend fun getMissingAssets(sessionId: String): List<MissingAsset>
-
-    fun observeSession(sessionId: String): Flow<InventorySession?>
 }

@@ -6,12 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.databinding.FragmentInventoryAssetScanBinding
@@ -30,16 +29,19 @@ class InventoryAssetScanFragment : Fragment() {
     private var _binding: FragmentInventoryAssetScanBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: InventoryViewModel by viewModels()
-    private val args: InventoryAssetScanFragmentArgs by navArgs()
+    // ✅ FIX: Use activityViewModels to share state with RoomScanFragment
+    private val viewModel: InventoryViewModel by activityViewModels()
+
+    // ✅ FIX: Replaced SafeArgs with standard Bundle extraction
+    private val sessionId: String by lazy {
+        requireArguments().getString("sessionId") ?: ""
+    }
 
     private var barcodeView: DecoratedBarcodeView? = null
     private lateinit var scannedAdapter: ScannedAssetAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentInventoryAssetScanBinding.inflate(inflater, container, false)
         return binding.root
@@ -48,7 +50,6 @@ class InventoryAssetScanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val sessionId = args.sessionId
         viewModel.loadExistingSession(sessionId)
 
         setupRecyclerView()
@@ -68,7 +69,6 @@ class InventoryAssetScanFragment : Fragment() {
     private fun setupScanner() {
         barcodeView = binding.barcodeView
 
-        // ✅ FIX 1: Use BarcodeResult instead of com.google.zxing.Result
         val callback = object : BarcodeCallback {
             override fun barcodeResult(result: BarcodeResult) {
                 barcodeView?.pause()
@@ -84,22 +84,15 @@ class InventoryAssetScanFragment : Fragment() {
     }
 
     private fun setupButtons() {
-        binding.btnComplete.setOnClickListener {
-            showCompletionConfirmDialog()
-        }
-
-        binding.btnCancel.setOnClickListener {
-            showCancelConfirmDialog()
-        }
+        binding.btnComplete.setOnClickListener { showCompletionConfirmDialog() }
+        binding.btnCancel.setOnClickListener { showCancelConfirmDialog() }
     }
 
     private fun setupObservers() {
-        // ✅ FIX 2: StateFlow uses collect, NOT observe()
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
 
-                    // Update progress
                     state.session?.let { session ->
                         binding.textRoomName.text = session.roomName
                         binding.textRoomPath.text = session.getFormattedPath()
@@ -111,14 +104,11 @@ class InventoryAssetScanFragment : Fragment() {
                         binding.textScannedCount.text = "${session.scannedAssetCount}"
                         binding.textExpectedCount.text = "/ ${session.expectedAssetCount}"
 
-                        // Enable complete button only if some assets scanned
                         binding.btnComplete.isEnabled = session.scannedAssetCount > 0
                     }
 
-                    // Update scanned list
                     scannedAdapter.submitList(state.scannedAssets)
 
-                    // Handle scan results
                     state.lastScanResult?.let { result ->
                         when (result) {
                             is ScanAssetUseCase.ScanResult.Success -> {
@@ -141,17 +131,14 @@ class InventoryAssetScanFragment : Fragment() {
                                 showScanFeedback("✗ Error: ${result.message}", false)
                                 barcodeView?.resume()
                             }
-                            else -> {}
                         }
                     }
 
-                    // Show missing assets dialog
                     if (state.showMissingDialog) {
                         showMissingAssetsDialog(state.missingAssets)
                         viewModel.dismissMissingDialog()
                     }
 
-                    // ✅ FIX 3: Handle nullable String for Toast
                     state.error?.let { error ->
                         Toast.makeText(requireContext(), error ?: "Unknown error", Toast.LENGTH_SHORT).show()
                         viewModel.clearError()
@@ -166,15 +153,11 @@ class InventoryAssetScanFragment : Fragment() {
         binding.textFeedback.text = message
         binding.textFeedback.visibility = View.VISIBLE
 
-        // ✅ FIX 4: Uses the colors you just added to colors.xml
         binding.cardFeedback.setCardBackgroundColor(
-            if (isSuccess)
-                requireContext().getColor(R.color.success_container)
-            else
-                requireContext().getColor(R.color.error_container)
+            if (isSuccess) requireContext().getColor(R.color.success_container)
+            else requireContext().getColor(R.color.error_container)
         )
 
-        // Auto-hide after delay
         view?.postDelayed({
             if (_binding != null) {
                 binding.textFeedback.visibility = View.GONE
@@ -186,9 +169,7 @@ class InventoryAssetScanFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Complete Inventory?")
             .setMessage("Are you sure you want to complete this inventory session?\n\nMissing assets will be recorded.")
-            .setPositiveButton("Complete") { _, _ ->
-                viewModel.completeSession()
-            }
+            .setPositiveButton("Complete") { _, _ -> viewModel.completeSession() }
             .setNegativeButton("Cancel", null)
             .show()
     }
@@ -212,34 +193,25 @@ class InventoryAssetScanFragment : Fragment() {
             return
         }
 
-        val message = missingAssets.joinToString("\n") {
-            "• ${it.assetName} (${it.assetSerial})"
-        }
+        val message = missingAssets.joinToString("\n") { "• ${it.assetName} (${it.assetSerial})" }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Inventory Complete")
             .setMessage("$message\n\n${missingAssets.size} assets missing")
             .setPositiveButton("View Details") { _, _ ->
-                val action = InventoryAssetScanFragmentDirections
-                    .actionAssetScanningToMissingAssets(args.sessionId)
-                findNavController().navigate(action)
+                // ✅ FIX: Replaced SafeArgs Directions with standard Bundle
+                val bundle = Bundle().apply {
+                    putString("sessionId", sessionId)
+                }
+                // Make sure R.id.missingAssetsFragment exists in your nav_graph.xml
+                findNavController().navigate(R.id.missingAssetsFragment, bundle)
             }
-            .setNegativeButton("Close") { _, _ ->
-                findNavController().navigateUp()
-            }
+            .setNegativeButton("Close") { _, _ -> findNavController().navigateUp() }
             .show()
     }
 
-    override fun onResume() {
-        super.onResume()
-        barcodeView?.resume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        barcodeView?.pause()
-    }
-
+    override fun onResume() { super.onResume(); barcodeView?.resume() }
+    override fun onPause() { super.onPause(); barcodeView?.pause() }
     override fun onDestroyView() {
         super.onDestroyView()
         barcodeView?.pause()

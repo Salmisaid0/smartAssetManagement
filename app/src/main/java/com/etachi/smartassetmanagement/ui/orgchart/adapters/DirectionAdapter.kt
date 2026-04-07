@@ -1,50 +1,70 @@
-package com.etachi.smartassetmanagement.ui.orgchart.adapters
+package com.etachi.smartassetmanagement.ui.organigram
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.etachi.smartassetmanagement.databinding.ItemDirectionBinding
-import com.etachi.smartassetmanagement.ui.orgchart.UiDepartment
-import com.etachi.smartassetmanagement.ui.orgchart.UiDirection
 
 class DirectionAdapter(
-    private val onDirectionClick: (String) -> Unit,
-    private val onDepartmentClick: (String, String) -> Unit,
-    private val onRoomClick: (String, String) -> Unit
-) : RecyclerView.Adapter<DirectionAdapter.VH>() {
-
-    private var items: List<UiDirection> = emptyList()
-
-    fun submitList(newList: List<UiDirection>) {
-        items = newList
-        notifyDataSetChanged() // Top level is small, notifyDataSetChanged is acceptable here
-    }
+    private val onDirectionClick: (directionId: String) -> Unit,
+    private val onDeptClick: (directionId: String, deptId: String) -> Unit,
+    private val onRoomClick: (roomId: String, roomName: String) -> Unit
+) : ListAdapter<UiDirection, DirectionAdapter.VH>(DiffCallback) {
 
     inner class VH(val binding: ItemDirectionBinding) : RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
-        VH(ItemDirectionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-
-    override fun getItemCount(): Int = items.size
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val binding = ItemDirectionBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return VH(binding)
+    }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        val dir = items[position]
+        val direction = getItem(position)
         with(holder.binding) {
-            textDirectionName.text = dir.name
-            textDeptCount.text = "${dir.deptCount} Departments"
-            ivExpand.animate().rotation(if (dir.isExpanded) 180f else 0f).setDuration(200).start()
+            textDirectionName.text = direction.name
 
-            root.setOnClickListener { onDirectionClick(dir.id) }
-
-            rvDepartments.apply {
-                layoutManager = LinearLayoutManager(context)
-                isNestedScrollingEnabled = false
-                (adapter as? DepartmentAdapter)?.submitList(dir.departments, onDepartmentClick, onRoomClick) ?: run {
-                    adapter = DepartmentAdapter(onDepartmentClick, onRoomClick)
-                }
-                layoutParams.height = if (dir.isExpanded) ViewGroup.LayoutParams.WRAP_CONTENT else 0
+            textDeptCount.text = if (direction.deptCount == 1) {
+                "1 Department"
+            } else {
+                "${direction.deptCount} Departments"
             }
+
+            ivExpand.rotation = if (direction.isExpanded) 180f else 0f
+
+            root.setOnClickListener {
+                onDirectionClick(direction.id)
+            }
+
+            if (direction.isExpanded && direction.departments.isNotEmpty()) {
+                rvDepartments.visibility = android.view.View.VISIBLE
+
+                if (rvDepartments.adapter == null) {
+                    rvDepartments.layoutManager = LinearLayoutManager(rvDepartments.context)
+                    rvDepartments.isNestedScrollingEnabled = false
+                    rvDepartments.adapter = DepartmentAdapter(onDeptClick, onRoomClick)
+                }
+
+                (rvDepartments.adapter as? DepartmentAdapter)?.submitList(direction.departments)
+            } else {
+                rvDepartments.visibility = android.view.View.GONE
+            }
+        }
+    }
+
+    companion object DiffCallback : DiffUtil.ItemCallback<UiDirection>() {
+        override fun areItemsTheSame(oldItem: UiDirection, newItem: UiDirection): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: UiDirection, newItem: UiDirection): Boolean {
+            return oldItem == newItem
         }
     }
 }

@@ -37,6 +37,15 @@
             android:textColor="@color/dash_text_hint" />
     </LinearLayout>
 
+    <!-- ✅ FIX 1: Added the missing ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/dash_teal"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvOrganigram"
         android:layout_width="match_parent"

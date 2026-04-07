@@ -4,22 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.databinding.FragmentInventoryRoomScanBinding
-import com.etachi.smartassetmanagement.domain.model.Permission
-import com.etachi.smartassetmanagement.utils.UserSessionManager
+import com.google.android.material.snackbar.Snackbar
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class InventoryRoomScanFragment : Fragment() {
@@ -27,17 +25,14 @@ class InventoryRoomScanFragment : Fragment() {
     private var _binding: FragmentInventoryRoomScanBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: InventoryViewModel by viewModels()
+    // ✅ FIX 1: Use activityViewModels to share state with InventoryAssetScanFragment
+    private val viewModel: InventoryViewModel by activityViewModels()
 
-    @Inject
-    lateinit var sessionManager: UserSessionManager
-
+    private var hasNavigatedToScan = false
     private var barcodeView: DecoratedBarcodeView? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentInventoryRoomScanBinding.inflate(inflater, container, false)
         return binding.root
@@ -46,26 +41,22 @@ class InventoryRoomScanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Permission check
-        if (!sessionManager.hasPermission(Permission.SCAN_AUDIT)) {
-            Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-            findNavController().navigateUp()
-            return
-        }
+        // Reset flag on fresh view creation
+        hasNavigatedToScan = false
 
+        // ✅ FIX 2: Removed broken button click listener. The scanner starts automatically.
         setupScanner()
         setupObservers()
     }
 
+    // ✅ FIX 3: Scans directly using the barcodeView already in your XML
     private fun setupScanner() {
         barcodeView = binding.barcodeView
 
-        // ✅ FIX 1: Use BarcodeResult instead of Result
         val callback = object : BarcodeCallback {
             override fun barcodeResult(result: BarcodeResult) {
-                val qrCode = result.text
                 barcodeView?.pause()
-                viewModel.startSession(qrCode)
+                viewModel.validateAndStartSession(result.text)
             }
 
             override fun possibleResultPoints(resultPoints: MutableList<com.google.zxing.ResultPoint>?) {
@@ -77,26 +68,36 @@ class InventoryRoomScanFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        // ✅ FIX 2: Use StateFlow collect instead of LiveData observe
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
+                launch { observeUiState() }
+            }
+        }
+    }
 
-                    binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+    private suspend fun observeUiState() {
+        viewModel.uiState.collect { state ->
+            binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
 
-                    // ✅ FIX 3: Handle nullable String properly in Toast
-                    state.error?.let { error ->
-                        Toast.makeText(requireContext(), error ?: "Unknown error", Toast.LENGTH_SHORT).show()
-                        viewModel.clearError()
-                        barcodeView?.resume()
+            state.error?.let { errorMessage ->
+                Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_LONG).show()
+                viewModel.clearError()
+                barcodeView?.resume() // Resume scanning after error
+            }
+
+            state.session?.let { session ->
+                if (!hasNavigatedToScan) {
+                    hasNavigatedToScan = true
+
+                    val bundle = Bundle().apply {
+                        putString("sessionId", session.id)
                     }
 
-                    state.session?.let { session ->
-                        // Session started successfully, navigate to asset scanning
-                        val action = InventoryRoomScanFragmentDirections
-                            .actionRoomScanToAssetScanning(session.id)
-                        findNavController().navigate(action)
-                    }
+                    // Make sure R.id.inventoryAssetScanFragment is in your nav_graph.xml
+                    findNavController().navigate(R.id.inventoryAssetScanFragment, bundle)
+
+                    // Clear ViewModel state immediately so back-press doesn't trigger loop
+                    viewModel.clearSessionState()
                 }
             }
         }
