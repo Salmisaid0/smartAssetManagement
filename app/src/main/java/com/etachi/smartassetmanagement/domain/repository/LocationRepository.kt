@@ -9,31 +9,32 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocationRepository {
 
+    // ─── Directions ──────────────────────────────────────────────────
     fun getDirections(): Flow<List<Direction>>
+    suspend fun getDirection(directionId: String): Direction?
 
-    suspend fun getDirection(directionId: String): Room?  // Returns Room for simplicity
-
+    // ─── Departments ─────────────────────────────────────────────────
+    /** Departments under a specific direction (used by organigram expand + AddAsset cascade). */
     fun getDepartments(directionId: String): Flow<List<Department>>
+
+    /** ALL active departments across every direction (used by OrganigrammeViewModel tree). */
+    fun getAllDepartments(): Flow<List<Department>>
 
     suspend fun getDepartment(directionId: String, departmentId: String): Department?
 
+    // ─── Rooms ───────────────────────────────────────────────────────
+    /** Rooms under a specific department (used by organigram expand + AddAsset cascade). */
     fun getRooms(departmentId: String): Flow<List<Room>>
 
-    /**
-     * Get room by QR code using collection group query.
-     * Returns null if not found.
-     */
-    suspend fun getRoomByQrCode(qrCode: String): Room?
+    /** ALL active rooms across every department (used by OrganigrammeViewModel tree). */
+    fun getAllRooms(): Flow<List<Room>>
 
-    /**
-     * Get room by document ID.
-     * Uses flat rooms collection for reliable lookups.
-     */
+    suspend fun getRoomByQrCode(qrCode: String): Room?
     suspend fun getRoom(roomId: String): Room?
 
-    suspend fun createDirection(direction: Direction): Resource<Unit>
-
-    suspend fun createDepartment(directionId: String, department: Department): Resource<Unit>
-
-    suspend fun createRoom(departmentId: String, room: Room): Resource<Unit>
+    // ─── Write Operations ────────────────────────────────────────────
+    // Change these signatures in the interface:
+    suspend fun createDirection(direction: Direction): Resource<String>
+    suspend fun createDepartment(directionId: String, department: Department): Resource<String>
+    suspend fun createRoom(departmentId: String, room: Room): Resource<String>
 }

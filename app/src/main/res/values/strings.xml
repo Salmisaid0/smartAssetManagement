@@ -1,3 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">E-kerillo</string>
+    <!-- DELETE THESE LINES FROM strings.xml -->
+    <string name="directions_count">%1$d Directions</string>
+    <string name="departments_count">%1$d Depts</string>
+    <string name="rooms_count">%1$d Rooms</string>
 </resources>
+

@@ -109,8 +109,8 @@
         android:label="Inventory History" />
 
     <fragment
-        android:id="@+id/navigation_orgchart"
-        android:name="com.etachi.smartassetmanagement.ui.organigram.OrganigramFragment"
+        android:id="@+id/navigation_organigram"
+        android:name="com.etachi.smartassetmanagement.ui.organigramme.OrganigrammeFragment"
         android:label="Locations"
         tools:layout="@layout/fragment_organigram">
         <action
@@ -154,7 +154,7 @@
     </fragment>
 
     <fragment
-        android:id="@+id/inventoryAssetScanFragment"
+        android:id="@+id/fragment_inventory_asset_scan"
         android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryAssetScanFragment"
         android:label="Scan Assets"
         tools:layout="@layout/fragment_inventory_asset_scan">
@@ -176,7 +176,6 @@
 
     <fragment
         android:id="@+id/inventorySessionResultsFragment"
-        android:name="com.etachi.smartassetmanagement.ui.inventory.InventorySessionResultsFragment"
         android:label="Session Results"
         tools:layout="@layout/fragment_inventory_session_results">
 

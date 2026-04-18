@@ -12,10 +12,10 @@ object RoomMapper {
                 name = snapshot.getString("name") ?: "",
                 code = snapshot.getString("code") ?: "",
                 departmentId = snapshot.getString("departmentId") ?: "",
-                departmentCode = snapshot.getString("departmentCode") ?: "", // ✅ ADDED
+                departmentCode = snapshot.getString("departmentCode") ?: "",
                 departmentName = snapshot.getString("departmentName") ?: "",
                 directionId = snapshot.getString("directionId") ?: "",
-                directionCode = snapshot.getString("directionCode") ?: "", // ✅ ADDED
+                directionCode = snapshot.getString("directionCode") ?: "",
                 directionName = snapshot.getString("directionName") ?: "",
                 fullPath = snapshot.getString("fullPath") ?: "",
                 qrCode = snapshot.getString("qrCode") ?: "",
@@ -30,6 +30,7 @@ object RoomMapper {
         }
     }
 
+    // ✅ FIXED: Added missing actualAssetCount
     fun toFirestoreMap(room: Room): Map<String, Any?> = mapOf(
         "name" to room.name,
         "code" to room.code,
@@ -42,6 +43,7 @@ object RoomMapper {
         "fullPath" to room.fullPath,
         "qrCode" to room.qrCode,
         "expectedAssetCount" to room.expectedAssetCount,
+        "actualAssetCount" to room.actualAssetCount, // ✅ ADDED
         "isActive" to room.isActive,
         "createdAtMillis" to (room.createdAtMillis ?: System.currentTimeMillis()),
         "updatedAtMillis" to System.currentTimeMillis()

@@ -16,6 +16,8 @@
     <color name="on_error_container">#FF410E0B</color>
     <color name="success_container">#FFC8E6C9</color>
 
+
+
     <!-- Error & Success (Crucial for UI feedback) -->
     <color name="md_theme_light_error">#BA1A1A</color>
     <color name="md_theme_light_onError">#FFFFFF</color>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootRowContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:paddingVertical="4dp">
+
+    <!-- Indent Space (Width set programmatically) -->
+    <View
+        android:id="@+id/indentSpace"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
+
+    <!-- Expand/Collapse Arrow -->
+    <ImageView
+        android:id="@+id/iconExpand"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Expand"
+        android:src="@drawable/ic_chevron_right"
+        app:tint="@color/dash_text_muted" />
+
+    <!-- Type Icon -->
+    <ImageView
+        android:id="@+id/iconType"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Type"
+        app:tint="@color/dash_teal"
+        tools:src="@drawable/business_svgrepo_com" />
+
+    <!-- Text Content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textNodeName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="@color/dash_text_primary"
+            tools:text="Direction Générale" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textNodeCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/dash_text_hint"
+            tools:text="DIR-GEN" />
+    </LinearLayout>
+
+    <!-- Child Count Badge -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textChildCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@color/dash_teal_surface"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"
+        android:textAppearance="?attr/textAppearanceLabelSmall"
+        android:textColor="@color/dash_teal"
+        android:visibility="gone"
+        tools:text="3 depts"
+        tools:visibility="visible" />
+
+    <!-- Add Child Button -->
+    <ImageButton
+        android:id="@+id/btnAddChild"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Add"
+        android:src="@android:drawable/ic_input_add"
+        app:tint="@color/dash_text_muted" />
+
+</LinearLayout>

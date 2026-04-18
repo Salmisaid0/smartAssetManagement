@@ -16,7 +16,6 @@
         android:icon="@drawable/ic_organigrame"
         android:title="Locations" />
 
-    <!-- ✅ ADDED: Inventory tab -->
     <item
         android:id="@+id/navigation_inventory"
         android:icon="@drawable/ic_inventory"

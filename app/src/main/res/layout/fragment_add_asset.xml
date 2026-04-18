@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    fragment_add_asset.xml
+    FIXED: Removed the invalid nested TextInputLayout that wrapped the 3 location dropdowns.
+    TextInputLayout only accepts ONE EditText child — nesting them causes a runtime crash.
+    The three dropdowns (Direction → Department → Room) are now direct children of the
+    outer LinearLayout, under their own "LOCATION" section header.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dash_bg">
 
-    <!-- 1. TOOLBAR (Themed to dash system) -->
+    <!-- TOOLBAR -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -17,14 +25,14 @@
         app:title="New Asset"
         app:titleTextColor="@color/dash_text_primary" />
 
-    <!-- 2. SCROLLABLE FORM AREA -->
+    <!-- SCROLLABLE FORM -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
         android:paddingBottom="96dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/footerCard"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <LinearLayout
@@ -32,9 +40,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
-            android:paddingTop="20dp">
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
 
-            <!-- SECTION 1 HEADER (Dashboard Style) -->
+            <!-- ══════════════════════════════════════ -->
+            <!-- SECTION 1: ASSET DETAILS              -->
+            <!-- ══════════════════════════════════════ -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -44,6 +55,7 @@
                 android:textAppearance="?attr/textAppearanceLabelSmall"
                 android:textColor="@color/dash_text_hint" />
 
+            <!-- Asset Name -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -63,6 +75,7 @@
                     android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Asset Type / Category -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -82,7 +95,6 @@
                     android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- CUSTOM DIVIDER -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -90,12 +102,14 @@
                 android:background="@color/dash_border"
                 android:importantForAccessibility="no" />
 
-            <!-- SECTION 2 HEADER -->
+            <!-- ══════════════════════════════════════ -->
+            <!-- SECTION 2: STATUS                     -->
+            <!-- ══════════════════════════════════════ -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:letterSpacing="0.08"
-                android:text="STATUS AND LOGISTICS"
+                android:text="STATUS"
                 android:textAllCaps="true"
                 android:textAppearance="?attr/textAppearanceLabelSmall"
                 android:textColor="@color/dash_text_hint" />
@@ -120,27 +134,6 @@
                     android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Location"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp"
-                app:startIconTint="@color/dash_text_muted">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputLocation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:textColor="@color/dash_text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- CUSTOM DIVIDER -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -148,7 +141,95 @@
                 android:background="@color/dash_border"
                 android:importantForAccessibility="no" />
 
-            <!-- SECTION 3 HEADER -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- SECTION 3: LOCATION — three cascading dropdowns               -->
+            <!-- Direction → Department → Room                                 -->
+            <!-- Each becomes enabled only after the parent is selected.       -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.08"
+                android:text="LOCATION"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="@color/dash_text_hint" />
+
+            <!-- Direction dropdown -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dropdownDirectionLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Direction"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerDirection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Department dropdown (enabled after Direction is chosen) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dropdownDepartmentLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Department"
+                android:enabled="false"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerDepartment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Room dropdown (enabled after Department is chosen) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dropdownRoomLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Room"
+                android:enabled="false"
+                app:boxBackgroundColor="@color/dash_surface"
+                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerRoom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="24dp"
+                android:background="@color/dash_border"
+                android:importantForAccessibility="no" />
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- SECTION 4: OWNERSHIP & TRACKING       -->
+            <!-- ══════════════════════════════════════ -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -158,6 +239,7 @@
                 android:textAppearance="?attr/textAppearanceLabelSmall"
                 android:textColor="@color/dash_text_hint" />
 
+            <!-- Owner -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -177,6 +259,7 @@
                     android:textColor="@color/dash_text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Serial Number -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -199,8 +282,9 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- 3. FLOATING FOOTER ACTION (Flat dash design) -->
+    <!-- FLOATING FOOTER -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/footerCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/dash_surface"
@@ -215,14 +299,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Top border line -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/dash_border"
                 android:importantForAccessibility="no" />
 
-            <!-- Styled MaterialButton (Safe for Kotlin .text calls) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveAsset"
                 android:layout_width="match_parent"
@@ -237,7 +319,6 @@
                 app:cornerRadius="12dp"
                 app:elevation="0dp" />
         </LinearLayout>
-
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

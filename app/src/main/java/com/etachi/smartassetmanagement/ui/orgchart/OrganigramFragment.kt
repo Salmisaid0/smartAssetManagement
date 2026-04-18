@@ -1,40 +1,39 @@
-package com.etachi.smartassetmanagement.ui.organigram
+package com.etachi.smartassetmanagement.ui.organigramme
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.databinding.FragmentOrganigramBinding
-import com.etachi.smartassetmanagement.ui.list.AssetViewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import com.etachi.smartassetmanagement.ui.organigramme.model.NodeType
+import com.etachi.smartassetmanagement.ui.organigramme.wizard.WizardBottomSheetFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
-class OrganigramFragment : Fragment() {
+class OrganigrammeFragment : Fragment() {
+
+    companion object {
+        private const val TAG = "OrganigrammeFragment"
+    }
 
     private var _binding: FragmentOrganigramBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: OrganigramViewModel by viewModels()
-
-    private val sharedAssetViewModel: AssetViewModel by activityViewModels()
-
-    private lateinit var directionAdapter: DirectionAdapter
+    private val viewModel: OrganigrammeViewModel by viewModels()
+    private lateinit var adapter: OrganigrammeAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _binding = FragmentOrganigramBinding.inflate(inflater, container, false)
         return binding.root
@@ -42,95 +41,54 @@ class OrganigramFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupAdapters()
-        setupFab()
+
+        binding.recyclerOrganigramme.layoutManager = LinearLayoutManager(requireContext())
+
+        adapter = OrganigrammeAdapter(
+            onDirectionClick = { nodeId -> viewModel.toggleNode(nodeId) },
+            onDepartmentClick = { nodeId -> viewModel.toggleNode(nodeId) },
+            onAddChildClick = { item -> showWizard() }
+        )
+        binding.recyclerOrganigramme.adapter = adapter
+
+        // ✅ FIXED: Show wizard when FAB clicked
+        binding.fabAddDirection.setOnClickListener {
+            showWizard()
+        }
+
         setupObservers()
     }
 
-    private fun setupAdapters() {
-        val onRoomClick = { roomId: String, roomName: String ->
-            navigateToRoomAssets(roomId, roomName)
-        }
-
-        val onDeptClick = { directionId: String, deptId: String ->
-            viewModel.onToggleDepartment(directionId, deptId)
-        }
-
-        val onDirectionClick = { directionId: String ->
-            viewModel.onToggleDirection(directionId)
-        }
-
-        directionAdapter = DirectionAdapter(onDirectionClick, onDeptClick, onRoomClick)
-
-        binding.rvOrganigram.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = directionAdapter
-        }
-    }
-
-    private fun navigateToRoomAssets(roomId: String, roomName: String) {
-        sharedAssetViewModel.setRoomFilter(roomId)
-
-        try {
-            val action = OrganigramFragmentDirections.actionOrganigramToAssets()
-            findNavController().navigate(action)
-        } catch (e: IllegalArgumentException) {
-            Snackbar.make(binding.root, "Navigation configuration error.", Snackbar.LENGTH_LONG).show()
-        }
-    }
-
-    private fun setupFab() {
-        binding.fabCreate.setOnClickListener { showCreateDialog() }
-    }
-
-    private fun showCreateDialog() {
-        val fabTarget = viewModel.state.value.fabTarget
-        val title = when (fabTarget) {
-            FabTarget.DIRECTION -> "Create Direction"
-            FabTarget.DEPARTMENT -> "Create Department"
-            FabTarget.ROOM -> "Create Room"
-        }
-
-        val inputEditText = EditText(requireContext()).apply {
-            hint = "Enter $title name..."
-            setPadding(48, 32, 48, 32)
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(title)
-            .setView(inputEditText)
-            .setPositiveButton("Create") { _, _ ->
-                val name = inputEditText.text.toString().trim()
-                when (fabTarget) {
-                    FabTarget.DIRECTION -> viewModel.createDirection(name)
-                    FabTarget.DEPARTMENT -> viewModel.createDepartment(name)
-                    FabTarget.ROOM -> viewModel.createRoom(name)
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+    // ✅ ADDED: Helper method to show wizard
+    private fun showWizard() {
+        Timber.d("Showing wizard...")
+        val wizard = WizardBottomSheetFragment()
+        wizard.show(childFragmentManager, TAG)
     }
 
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { observeOrganigramState() }
+                viewModel.uiState.collect { state ->
+                    if (state.nodes.isEmpty() && !state.isLoading) {
+                        binding.recyclerOrganigramme.visibility = View.GONE
+                        binding.emptyStateView.visibility = View.VISIBLE
+                    } else {
+                        binding.recyclerOrganigramme.visibility = View.VISIBLE
+                        binding.emptyStateView.visibility = View.GONE
+                    }
+
+                    adapter.submitList(state.nodes)
+
+                    val directions = state.nodes.count { it.type == NodeType.DIRECTION }
+                    val departments = state.nodes.count { it.type == NodeType.DEPARTMENT }
+                    val rooms = state.nodes.count { it.type == NodeType.ROOM }
+
+                    binding.textDirectionCount.text = "$directions Direction${if (directions != 1) "s" else ""}"
+                    binding.textDepartmentCount.text = "$departments Dept${if (departments != 1) "s" else ""}"
+                    binding.textRoomCount.text = "$rooms Room${if (rooms != 1) "s" else ""}"
+                }
             }
-        }
-    }
-
-    private suspend fun observeOrganigramState() {
-        viewModel.state.collect { state ->
-            binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
-
-            state.error?.let { error ->
-                Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
-                viewModel.clearError()
-            }
-
-            directionAdapter.submitList(state.directions)
-
-            binding.fabCreate.setImageResource(R.drawable.add_square_svgrepo_com)
         }
     }
 
