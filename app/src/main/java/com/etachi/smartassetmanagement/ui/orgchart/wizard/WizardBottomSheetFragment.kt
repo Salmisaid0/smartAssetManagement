@@ -62,13 +62,11 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
                 textError.visibility = if (state.errorMessage != null) View.VISIBLE else View.GONE
 
                 when (state.currentStep) {
-                    is OrganigrammeWizardStep.PromptAddDepartment -> {
-                        btnNext.visibility = View.GONE
-                        btnSkip.text = "No, Finish Here"
-                    }
-                    is OrganigrammeWizardStep.PromptAddRoom -> {
-                        btnNext.visibility = View.GONE
-                        btnSkip.text = "No, Finish Here"
+                    // ✅ REMOVED: PromptAddDepartment and PromptAddRoom cases
+                    is OrganigrammeWizardStep.AddDepartment -> {
+                        btnNext.text = "Next"
+                        btnNext.visibility = View.VISIBLE
+                        btnSkip.visibility = View.VISIBLE
                     }
                     is OrganigrammeWizardStep.AddRoom -> {
                         btnNext.text = "Save & Finish"
@@ -81,6 +79,7 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
                         btnSkip.visibility = View.VISIBLE
                     }
                 }
+
             }
         }
 
@@ -135,6 +134,7 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
         Timber.d("🔧 swapContent called: ${step::class.simpleName}")
         container.removeAllViews()
 
+        // ✅ FIXED: Added 'else' branch that returns a View
         val view = when (step) {
             is OrganigrammeWizardStep.AddDirection -> {
                 Timber.d("✅ Creating AddDirection card")
@@ -158,12 +158,17 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
                 createPromptCard(requireContext(), "Department Created Successfully",
                     "'${step.departmentName}' is ready. Add a Room to it?")
             }
-
-            else -> {}
+            // ✅ ADDED: Else branch returns a View (not Unit!)
+            else -> {
+                Timber.d("❌ Unknown step type: ${step::class.simpleName}")
+                View(requireContext())
+            }
         }
-        container.addView(view as View?)
+
+        container.addView(view)
         Timber.d("✅ View added, Child Count: ${container.childCount}")
     }
+
 
     private fun createInputCard(context: android.content.Context, title: String): View {
         val card = MaterialCardView(context)
@@ -250,6 +255,7 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
         linearLayout.gravity = android.view.Gravity.CENTER
         linearLayout.setBackgroundColor(context.getColor(R.color.dash_surface))
 
+        // Icon
         val icon = ImageView(context)
         icon.setImageResource(R.drawable.check_mark_circle_2_svgrepo_com)
         icon.imageTintList = android.content.res.ColorStateList.valueOf(context.getColor(R.color.dash_teal))
@@ -258,15 +264,16 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
         icon.setPadding(0, 0, 0, (16f * context.resources.displayMetrics.density).toInt())
         linearLayout.addView(icon)
 
+        // Title
         val tvTitle = MaterialTextView(context)
         tvTitle.text = title
         tvTitle.textSize = 20f
-        // ✅ FIXED: Use setTypeface instead of textStyle
         tvTitle.setTypeface(null, android.graphics.Typeface.BOLD)
         tvTitle.setTextColor(context.getColor(R.color.dash_text_primary))
         tvTitle.setPadding(0, 0, 0, (8f * context.resources.displayMetrics.density).toInt())
         linearLayout.addView(tvTitle)
 
+        // Body
         val tvBody = MaterialTextView(context)
         tvBody.text = body
         tvBody.textSize = 16f
@@ -275,9 +282,70 @@ class WizardBottomSheetFragment : BottomSheetDialogFragment() {
         tvBody.setPadding(0, 0, 0, (24f * context.resources.displayMetrics.density).toInt())
         linearLayout.addView(tvBody)
 
+        // ✅ Get current step ONCE and capture values
+        val currentStep = viewModel.uiState.value.currentStep
+        val directionName: String
+        val departmentName: String
+        val buttonText: String
+
+        when (currentStep) {
+            is OrganigrammeWizardStep.PromptAddDepartment -> {
+                directionName = currentStep.directionName
+                departmentName = ""
+                buttonText = "Yes, Add Department"
+            }
+            is OrganigrammeWizardStep.PromptAddRoom -> {
+                directionName = ""
+                departmentName = currentStep.departmentName
+                buttonText = "Yes, Add Room"
+            }
+            else -> {
+                directionName = ""
+                departmentName = ""
+                buttonText = "Yes, Continue"
+            }
+        }
+
+        // ✅ "Yes" Button
+        val btnYes = MaterialButton(context)
+        btnYes.text = buttonText
+        btnYes.layoutParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        btnYes.setBackgroundColor(context.getColor(R.color.dash_teal))
+        btnYes.setTextColor(context.getColor(R.color.dash_bg))
+        btnYes.setPadding(
+            (32f * context.resources.displayMetrics.density).toInt(),
+            (12f * context.resources.displayMetrics.density).toInt(),
+            (32f * context.resources.displayMetrics.density).toInt(),
+            (12f * context.resources.displayMetrics.density).toInt()
+        )
+
+        // ✅ Click listener uses captured values (no smart-cast needed)
+        btnYes.setOnClickListener {
+            when (currentStep) {
+                is OrganigrammeWizardStep.PromptAddDepartment -> {
+                    viewModel.onActionNext(directionName, "DEPT")
+                }
+                is OrganigrammeWizardStep.PromptAddRoom -> {
+                    viewModel.onActionNext(departmentName, "ROOM")
+                }
+                // ✅ Required else branch
+                else -> {
+                    Timber.d("Unknown prompt step type")
+                }
+            }
+        }
+
+        linearLayout.addView(btnYes)
+
         card.addView(linearLayout)
         return card
     }
+
+
+
 
     private fun updateProgressBar(step: OrganigrammeWizardStep) {
         val active = requireContext().getColor(R.color.dash_teal)

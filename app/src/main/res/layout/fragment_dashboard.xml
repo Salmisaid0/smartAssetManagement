@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -18,13 +18,11 @@
         android:paddingEnd="20dp"
         android:paddingTop="20dp">
 
-        <!-- ═══════════════════════════════════════════════════════
-             1. HEADER
-             • Date sub-label (uppercase label style)
-             • Bold welcome headline
-             • Pill badge for role with live-status dot
-        ══════════════════════════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- 1. HEADER SECTION -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
 
+        <!-- Date Label -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textGreetingDate"
             android:layout_width="wrap_content"
@@ -35,6 +33,7 @@
             android:textColor="@color/dash_text_hint"
             tools:text="Monday, 30 March" />
 
+        <!-- Welcome Headline -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textWelcomeEmail"
             android:layout_width="wrap_content"
@@ -45,7 +44,7 @@
             android:textColor="@color/dash_text_primary"
             tools:text="Welcome, John" />
 
-        <!-- Role pill with status dot -->
+        <!-- Role Pill Badge -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,30 +57,12 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp">
 
-            <!--
-                bg_role_pill.xml (res/drawable/):
-                <shape xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:shape="rectangle">
-                    <solid android:color="@color/dash_surface_elevated"/>
-                    <stroke android:width="1dp" android:color="@color/dash_border_strong"/>
-                    <corners android:radius="20dp"/>
-                </shape>
-            -->
-
-            <!-- Live status dot -->
+            <!-- Live Status Dot -->
             <View
                 android:layout_width="6dp"
                 android:layout_height="6dp"
                 android:background="@drawable/bg_status_dot"
                 android:importantForAccessibility="no" />
-
-            <!--
-                bg_status_dot.xml (res/drawable/):
-                <shape xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:shape="oval">
-                    <solid android:color="@color/dash_teal"/>
-                </shape>
-            -->
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/chipUserRole"
@@ -96,29 +77,23 @@
                 tools:text="Administrator" />
         </LinearLayout>
 
-        <!-- ═══════════════════════════════════════════════════════
-             2. STAT CARDS GRID
-             Design improvements:
-             • Colored top-accent bar encodes meaning:
-               Blue = Total, Teal = Active, Amber = Maintenance
-             • Monospaced numbers for professional density
-             • Micro progress bar shows proportion at a glance
-             • Consistent content descriptions for a11y
-        ══════════════════════════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- 2. STAT CARDS GRID -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
             android:orientation="horizontal">
 
-            <!-- Total Assets -->
+            <!-- Total Assets Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTotalAssets"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                android:contentDescription="50 total assets"
+                android:contentDescription="Total assets count"
                 app:cardBackgroundColor="@color/dash_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
@@ -135,7 +110,7 @@
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp">
 
-                    <!-- Colored top accent bar -->
+                    <!-- Colored Top Accent Bar -->
                     <View
                         android:layout_width="32dp"
                         android:layout_height="2dp"
@@ -163,7 +138,7 @@
                         android:textAppearance="?attr/textAppearanceLabelSmall"
                         android:textColor="@color/dash_text_hint" />
 
-                    <!-- Progress bar: 100% fill for total -->
+                    <!-- Progress Bar (100% for total) -->
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
@@ -179,14 +154,14 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Active Assets -->
+            <!-- Active Assets Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardActiveAssets"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="6dp"
                 android:layout_weight="1"
-                android:contentDescription="42 active assets"
+                android:contentDescription="Active assets count"
                 app:cardBackgroundColor="@color/dash_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
@@ -230,7 +205,7 @@
                         android:textAppearance="?attr/textAppearanceLabelSmall"
                         android:textColor="@color/dash_text_hint" />
 
-                    <!-- Progress bar fill driven by % from ViewModel (84%) -->
+                    <!-- Dynamic Progress Bar -->
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
@@ -238,11 +213,6 @@
                         android:background="@color/dash_border"
                         android:importantForAccessibility="no">
 
-                        <!--
-                            Set width programmatically in Fragment:
-                            val pct = (active.toFloat() / total) * bar.width
-                            barFill.updateLayoutParams { width = pct.toInt() }
-                        -->
                         <View
                             android:id="@+id/barActiveFill"
                             android:layout_width="0dp"
@@ -252,14 +222,14 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Maintenance Assets -->
+            <!-- Maintenance Assets Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardMaintenanceAssets"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                android:contentDescription="8 assets in maintenance"
+                android:contentDescription="Maintenance assets count"
                 app:cardBackgroundColor="@color/dash_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
@@ -303,6 +273,7 @@
                         android:textAppearance="?attr/textAppearanceLabelSmall"
                         android:textColor="@color/dash_text_hint" />
 
+                    <!-- Dynamic Progress Bar -->
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
@@ -320,14 +291,9 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- ═══════════════════════════════════════════════════════
-             3. QUICK ACTIONS SHORTCUT BAR
-             Design improvements:
-             • Scan: filled teal icon box — primary action is clear
-             • Add: subtle surface icon box — secondary hierarchy
-             • Icon boxes use drawable backgrounds for proper theming
-             • Clear visual distinction between primary & secondary
-        ══════════════════════════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- 3. QUICK ACTIONS CARD -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -359,12 +325,6 @@
                     android:minHeight="48dp"
                     android:orientation="vertical">
 
-                    <!--
-                        bg_icon_teal.xml:
-                        <shape><solid android:color="@color/dash_teal_surface"/>
-                        <stroke android:width="1dp" android:color="@color/dash_teal"/>
-                        <corners android:radius="12dp"/></shape>
-                    -->
                     <FrameLayout
                         android:layout_width="48dp"
                         android:layout_height="48dp"
@@ -412,12 +372,6 @@
                     android:minHeight="48dp"
                     android:orientation="vertical">
 
-                    <!--
-                        bg_icon_surface.xml:
-                        <shape><solid android:color="@color/dash_surface_elevated"/>
-                        <stroke android:width="1dp" android:color="@color/dash_border_strong"/>
-                        <corners android:radius="12dp"/></shape>
-                    -->
                     <FrameLayout
                         android:layout_width="48dp"
                         android:layout_height="48dp"
@@ -429,7 +383,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:importantForAccessibility="no"
-                            android:src="@drawable/ic_add"
+                            android:src="@drawable/add_square_svgrepo_com"
                             app:tint="@color/dash_text_muted" />
                     </FrameLayout>
 
@@ -442,20 +396,12 @@
                         android:textAppearance="?attr/textAppearanceLabelMedium"
                         android:textColor="@color/dash_text_muted" />
                 </LinearLayout>
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ═══════════════════════════════════════════════════════
-             4. RECENT ACTIVITY
-             Design improvements:
-             • Section header has "See all" action
-             • Each row shows: icon (colored per status) + asset
-               name + actor sub-label + status badge + timestamp
-             • Status badge background + text uses semantic colors
-             • Item rows use a subtle separator (not a full divider)
-        ══════════════════════════════════════════════════════════ -->
-
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- 4. RECENT ACTIVITY SECTION -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -486,12 +432,7 @@
                 android:textColor="@color/dash_teal" />
         </LinearLayout>
 
-        <!--
-            RecyclerView uses item_scan_history_redesigned.xml (see below).
-            app:layoutManager declared in XML avoids NPE if Fragment skips setup.
-        -->
-
-        <!-- Empty state -->
+        <!-- Scan History RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvDashboardHistory"
             android:layout_width="match_parent"
@@ -503,6 +444,7 @@
             tools:itemCount="3"
             tools:listitem="@layout/item_scan_history" />
 
+        <!-- Empty State for History -->
         <LinearLayout
             android:id="@+id/layoutEmptyState"
             android:layout_width="match_parent"
@@ -537,7 +479,7 @@
                 android:layout_marginTop="4dp"
                 android:alpha="0.6"
                 android:gravity="center"
-                android:text="Scan a QR code or add an asset\nto see activity here"
+                android:text="Scan a QR code or add an asset to see activity here"
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textColor="@color/dash_text_hint" />
         </LinearLayout>

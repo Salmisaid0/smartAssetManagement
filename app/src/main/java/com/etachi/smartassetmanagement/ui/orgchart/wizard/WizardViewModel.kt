@@ -49,19 +49,23 @@ class WizardViewModel @Inject constructor(
 
             when (step) {
                 is OrganigrammeWizardStep.AddDirection -> saveDirection(name, code)
-                is OrganigrammeWizardStep.AddDepartment -> saveDepartment(name, code, step.directionId)
+                is OrganigrammeWizardStep.AddDepartment -> saveDepartment(name, code, step.directionId, step.directionName)
                 is OrganigrammeWizardStep.AddRoom -> saveRoom(name, code, step.departmentId)
+                is OrganigrammeWizardStep.PromptAddDepartment -> saveDepartment(name, code, step.directionId, step.directionName)
+                is OrganigrammeWizardStep.PromptAddRoom -> saveRoom(name, code, step.departmentId)
                 else -> _uiState.update { it.copy(isLoading = false, errorMessage = "Invalid state") }
             }
         }
     }
 
     private suspend fun saveDirection(name: String, code: String) {
+        Timber.d("💾 Saving direction: name=$name, code=$code")
+
         when (val result = locationRepository.createDirection(
             Direction(name = name.trim(), code = code.trim(), isActive = true)
         )) {
             is Resource.Success -> {
-                Timber.d("Direction created with ID: ${result.data}")
+                Timber.d("✅ Direction created with ID: ${result.data}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -72,61 +76,81 @@ class WizardViewModel @Inject constructor(
                     )
                 }
             }
-            is Resource.Error -> _uiState.update {
-                it.copy(isLoading = false, errorMessage = result.message ?: "Failed")
+            is Resource.Error -> {
+                Timber.e("❌ Direction creation failed: ${result.message}")
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = result.message ?: "Failed")
+                }
             }
             else -> {}
         }
     }
 
-    private suspend fun saveDepartment(name: String, code: String, dirId: String) {
+    // ✅ FIXED: Pass directionId and directionName as parameters
+    private suspend fun saveDepartment(name: String, code: String, directionId: String, directionName: String) {
+        Timber.d("💾 Saving department: name=$name, code=$code, directionId=$directionId")
+
         when (val result = locationRepository.createDepartment(
-            dirId,
+            directionId,
             Department(
                 name = name.trim(),
                 code = code.trim().uppercase(),
-                directionId = dirId,
+                directionId = directionId,
+                directionName = directionName,
+                directionCode = "",
                 isActive = true
             )
         )) {
             is Resource.Success -> {
-                Timber.d("Department created with ID: ${result.data}")
-                val step = _uiState.value.currentStep as? OrganigrammeWizardStep.AddDepartment
+                Timber.d("✅ Department created with ID: ${result.data}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         currentStep = OrganigrammeWizardStep.PromptAddRoom(
-                            directionId = step?.directionId ?: dirId,
-                            directionName = step?.directionName ?: "",
+                            directionId = directionId,
+                            directionName = directionName,
                             departmentId = result.data,
                             departmentName = name.trim()
                         )
                     )
                 }
             }
-            is Resource.Error -> _uiState.update {
-                it.copy(isLoading = false, errorMessage = result.message ?: "Failed")
+            is Resource.Error -> {
+                Timber.e("❌ Department creation failed: ${result.message}")
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = result.message ?: "Failed")
+                }
             }
             else -> {}
         }
     }
 
     private suspend fun saveRoom(name: String, code: String, deptId: String) {
+        Timber.d("💾 Saving room: name=$name, code=$code, deptId=$deptId")
+
         when (val result = locationRepository.createRoom(
             deptId,
             Room(
                 name = name.trim(),
                 code = code.trim().uppercase(),
                 departmentId = deptId,
+                departmentCode = "",
+                departmentName = "",
+                directionId = "",
+                directionCode = "",
+                directionName = "",
                 isActive = true
             )
         )) {
             is Resource.Success -> {
-                Timber.d("Room created with ID: ${result.data}")
+                Timber.d("✅ Room created with ID: ${result.data}")
                 _uiState.update { it.copy(isLoading = false, isComplete = true) }
             }
-            is Resource.Error -> _uiState.update {
-                it.copy(isLoading = false, errorMessage = result.message ?: "Failed")
+            is Resource.Error -> {
+                Timber.e("❌ Room creation failed: ${result.message}")
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = result.message ?: "Failed")
+                }
             }
             else -> {}
         }

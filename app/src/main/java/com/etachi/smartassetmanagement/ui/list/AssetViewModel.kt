@@ -19,31 +19,54 @@ class AssetViewModel @Inject constructor(
     private val sessionManager: UserSessionManager
 ) : ViewModel() {
 
-    // 1. Search Query State
-    private val _searchQuery = MutableStateFlow("")
+    // ═══════════════════════════════════════════════════════════════
+    // FILTERS
+    // ═══════════════════════════════════════════════════════════════
 
-    // 2. Room Filter State (null = show all)
-    private val _filterRoomId = MutableStateFlow<String?>(null)
+    private val _filters = MutableStateFlow(AssetFilters())
+    val currentFilters: StateFlow<AssetFilters> = _filters.asStateFlow()
 
-    // 3. Scan Mode State
+    // ✅ Assets flow with proper filtering
+    val assets: StateFlow<List<Asset>> = _filters
+        .flatMapLatest { filters ->
+            repositoryFlow(filters)
+                .map { assets ->
+                    if (filters.status != null) {
+                        assets.filter { it.status.equals(filters.status, ignoreCase = true) }
+                    } else {
+                        assets
+                    }
+                }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // ✅ Helper function
+    private fun repositoryFlow(filters: AssetFilters): Flow<List<Asset>> {
+        return when {
+            !filters.roomId.isNullOrEmpty() -> repository.getAssetsByRoom(filters.roomId)
+            !filters.searchQuery.isNullOrEmpty() -> repository.searchAssets(filters.searchQuery)
+            else -> repository.getAllAssets()
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SCAN HISTORY (✅ ADDED BACK - NEEDED BY DASHBOARD & SCANNER)
+    // ═══════════════════════════════════════════════════════════════
+
+    private val _scanHistory = MutableStateFlow<List<ScanHistory>>(emptyList())
+    val scanHistory: StateFlow<List<ScanHistory>> = _scanHistory.asStateFlow()
+
+    // ═══════════════════════════════════════════════════════════════
+    // SCAN MODE (✅ ADDED BACK - NEEDED BY SCANNER)
+    // ═══════════════════════════════════════════════════════════════
+
     private val _scanMode = MutableStateFlow(ScanMode.IDENTIFY)
     val scanMode: StateFlow<ScanMode> = _scanMode.asStateFlow()
 
-    // 4. Assets Flow — fixed with flatMapLatest to unwrap inner Flow
-    val assets: StateFlow<List<Asset>> = combine(_searchQuery, _filterRoomId) { query, roomId ->
-        Pair(query, roomId)
-    }.flatMapLatest { (query, roomId) ->
-        when {
-            roomId != null -> repository.getAssetsByRoom(roomId)
-            query.isNotEmpty() -> repository.searchAssets(query)
-            else -> repository.getAllAssets()
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    // ═══════════════════════════════════════════════════════════════
+    // STATS
+    // ═══════════════════════════════════════════════════════════════
 
-    // 5. Scan History — directly from repository (uses Firebase Timestamp correctly)
-    val scanHistory: Flow<List<ScanHistory>> = repository.getScanHistory()
-
-    // 6. Dashboard Stats
     data class DashboardStats(
         val total: Int = 0,
         val active: Int = 0,
@@ -65,35 +88,51 @@ class AssetViewModel @Inject constructor(
                 )
             }
         }
+
+        // ✅ Load scan history
+        viewModelScope.launch {
+            repository.getScanHistory().collect { history ->
+                _scanHistory.value = history
+            }
+        }
     }
 
-    // =========================================================
-    // State Modifiers
-    // =========================================================
+    // ═══════════════════════════════════════════════════════════════
+    // FILTER FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
 
     fun setSearchQuery(query: String) {
-        _searchQuery.value = query
+        _filters.update { it.copy(searchQuery = query) }
     }
 
     fun setRoomFilter(roomId: String?) {
-        _filterRoomId.value = roomId
+        _filters.update { it.copy(roomId = roomId) }
     }
+
+    fun setStatusFilter(status: String?) {
+        _filters.update { it.copy(status = status) }
+    }
+
+    fun clearFilters() {
+        _filters.update { AssetFilters() }
+    }
+
+    fun refreshAssets() {
+        _filters.update { it.copy() }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SCAN MODE (✅ ADDED BACK)
+    // ═══════════════════════════════════════════════════════════════
 
     fun setScanMode(mode: ScanMode) {
         _scanMode.value = mode
     }
 
-    // =========================================================
-    // Scanner Actions
-    // =========================================================
+    // ═══════════════════════════════════════════════════════════════
+    // SCANNER ACTIONS (✅ ADDED BACK)
+    // ═══════════════════════════════════════════════════════════════
 
-    /**
-     * FIX: Calls repository.logScanEvent() instead of building ScanHistory manually.
-     * repository.logScanEvent() already:
-     *   - Uses the correct ScanHistory field names (action, performedById, performedByEmail)
-     *   - Uses Firebase server timestamp (not a Long)
-     *   - Reads currentUser directly from UserSessionManager internally
-     */
     fun logScan(asset: Asset, modeName: String, location: String) {
         viewModelScope.launch {
             try {
@@ -104,10 +143,6 @@ class AssetViewModel @Inject constructor(
         }
     }
 
-    /**
-     * FIX: Uses sessionManager.getCurrentUserName() which now exists in UserSessionManager.
-     * Returns the current user's email as their display name.
-     */
     fun checkInAsset(asset: Asset) {
         viewModelScope.launch {
             try {
@@ -133,20 +168,9 @@ class AssetViewModel @Inject constructor(
         }
     }
 
-
-    // =========================================================
-    // CRUD Operations
-    // =========================================================
-
-    fun insertAsset(asset: Asset) {
-        viewModelScope.launch {
-            try {
-                repository.insertAsset(asset)
-            } catch (e: Exception) {
-                // Handle silently
-            }
-        }
-    }
+    // ═══════════════════════════════════════════════════════════════
+    // CRUD
+    // ═══════════════════════════════════════════════════════════════
 
     fun updateAsset(asset: Asset) {
         viewModelScope.launch {
@@ -159,6 +183,12 @@ class AssetViewModel @Inject constructor(
             if (sessionManager.hasPermission(Permission.ASSET_DELETE)) {
                 repository.deleteAsset(asset)
             }
+        }
+    }
+
+    fun insertAsset(asset: Asset) {
+        viewModelScope.launch {
+            repository.insertAsset(asset)
         }
     }
 }

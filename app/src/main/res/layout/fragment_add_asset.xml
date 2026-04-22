@@ -1,262 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    fragment_add_asset.xml
-    FIXED: Removed the invalid nested TextInputLayout that wrapped the 3 location dropdowns.
-    TextInputLayout only accepts ONE EditText child — nesting them causes a runtime crash.
-    The three dropdowns (Direction → Department → Room) are now direct children of the
-    outer LinearLayout, under their own "LOCATION" section header.
--->
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dash_bg">
+    android:background="@color/dash_bg"
+    android:fitsSystemWindows="true">
 
-    <!-- TOOLBAR -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- APP BAR -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:background="@color/dash_surface"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:navigationIconTint="@color/dash_text_primary"
-        app:title="New Asset"
-        app:titleTextColor="@color/dash_text_primary" />
+        android:layout_height="wrap_content"
+        android:background="@color/dash_bg"
+        app:elevation="0dp">
 
-    <!-- SCROLLABLE FORM -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Add Asset"
+            app:titleTextColor="@color/dash_text_primary"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/dash_text_primary" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dash_border" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- FORM -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:fillViewport="true"
-        android:paddingBottom="96dp"
-        app:layout_constraintBottom_toTopOf="@+id/footerCard"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        android:paddingBottom="80dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp">
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp">
 
-            <!-- ══════════════════════════════════════ -->
-            <!-- SECTION 1: ASSET DETAILS              -->
-            <!-- ══════════════════════════════════════ -->
+            <!-- Section: Asset Info -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:letterSpacing="0.08"
-                android:text="ASSET DETAILS"
-                android:textAllCaps="true"
-                android:textAppearance="?attr/textAppearanceLabelSmall"
-                android:textColor="@color/dash_text_hint" />
+                android:text="Asset Information"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textColor="@color/dash_text_hint"
+                android:letterSpacing="0.05"
+                android:textAllCaps="true" />
 
-            <!-- Asset Name -->
+            <!-- Name -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Asset Name *"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
+                android:layout_marginTop="12dp"
+                android:hint="Name *"
+                app:boxStrokeColor="@color/dash_teal"
                 app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:textColor="@color/dash_text_primary" />
+                    android:inputType="textCapWords"
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Asset Type / Category -->
+            <!-- Type -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="Type / Category *"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeColor="@color/dash_teal"
                 app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:textColor="@color/dash_text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="24dp"
-                android:background="@color/dash_border"
-                android:importantForAccessibility="no" />
-
-            <!-- ══════════════════════════════════════ -->
-            <!-- SECTION 2: STATUS                     -->
-            <!-- ══════════════════════════════════════ -->
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.08"
-                android:text="STATUS"
-                android:textAllCaps="true"
-                android:textAppearance="?attr/textAppearanceLabelSmall"
-                android:textColor="@color/dash_text_hint" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/statusDropdownLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Status"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinnerStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:textColor="@color/dash_text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="24dp"
-                android:background="@color/dash_border"
-                android:importantForAccessibility="no" />
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- SECTION 3: LOCATION — three cascading dropdowns               -->
-            <!-- Direction → Department → Room                                 -->
-            <!-- Each becomes enabled only after the parent is selected.       -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.08"
-                android:text="LOCATION"
-                android:textAllCaps="true"
-                android:textAppearance="?attr/textAppearanceLabelSmall"
-                android:textColor="@color/dash_text_hint" />
-
-            <!-- Direction dropdown -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/dropdownDirectionLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Direction"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinnerDirection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:textColor="@color/dash_text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Department dropdown (enabled after Direction is chosen) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/dropdownDepartmentLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Department"
-                android:enabled="false"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinnerDepartment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:textColor="@color/dash_text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Room dropdown (enabled after Department is chosen) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/dropdownRoomLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Room"
-                android:enabled="false"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinnerRoom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:textColor="@color/dash_text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="24dp"
-                android:background="@color/dash_border"
-                android:importantForAccessibility="no" />
-
-            <!-- ══════════════════════════════════════ -->
-            <!-- SECTION 4: OWNERSHIP & TRACKING       -->
-            <!-- ══════════════════════════════════════ -->
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.08"
-                android:text="OWNERSHIP AND TRACKING"
-                android:textAllCaps="true"
-                android:textAppearance="?attr/textAppearanceLabelSmall"
-                android:textColor="@color/dash_text_hint" />
-
-            <!-- Owner -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Owner"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputOwner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:textColor="@color/dash_text_primary" />
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Serial Number -->
@@ -266,59 +111,209 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="Serial Number"
-                app:boxBackgroundColor="@color/dash_surface"
-                app:boxStrokeColor="@color/dash_input_stroke_state"
+                app:boxStrokeColor="@color/dash_teal"
                 app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="1dp">
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSerial"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:textColor="@color/dash_text_primary" />
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp"
+                    android:fontFamily="monospace" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Owner -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Owner"
+                app:boxStrokeColor="@color/dash_teal"
+                app:boxStrokeWidth="1dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputOwner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="@color/dash_border" />
+
+            <!-- Section: Status -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textColor="@color/dash_text_hint"
+                android:letterSpacing="0.05"
+                android:textAllCaps="true" />
+
+            <!-- Status Dropdown -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/statusDropdownLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Status"
+                app:boxStrokeColor="@color/dash_teal"
+                app:boxStrokeWidth="1dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="@color/dash_border" />
+
+            <!-- Section: Location -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textColor="@color/dash_text_hint"
+                android:letterSpacing="0.05"
+                android:textAllCaps="true" />
+
+            <!-- Direction Dropdown -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dropdownDirectionLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Direction"
+                app:boxStrokeColor="@color/dash_teal"
+                app:boxStrokeWidth="1dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerDirection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Department Dropdown -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dropdownDepartmentLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Department"
+                android:enabled="false"
+                app:boxStrokeColor="@color/dash_teal"
+                app:boxStrokeWidth="1dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerDepartment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Room Dropdown -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dropdownRoomLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Room"
+                android:enabled="false"
+                app:boxStrokeColor="@color/dash_teal"
+                app:boxStrokeWidth="1dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerRoom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/dash_text_primary"
+                    android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- FLOATING FOOTER -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/footerCard"
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SAVE BUTTON -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/dash_surface"
-        app:cardCornerRadius="0dp"
-        app:cardElevation="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:strokeColor="@color/dash_border"
-        app:strokeWidth="1dp">
+        android:layout_gravity="bottom"
+        android:background="@color/dash_surface"
+        android:elevation="8dp"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="1dp"
+            android:background="@color/dash_border" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/dash_border"
-                android:importantForAccessibility="no" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveAsset"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="12dp"
+            android:text="Save Asset"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:letterSpacing="0.02"
+            app:backgroundTint="@color/dash_teal"
+            app:cornerRadius="8dp" />
+    </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSaveAsset"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="12dp"
-                android:backgroundTint="@color/dash_teal"
-                android:letterSpacing="0.02"
-                android:text="Save Asset"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="@color/dash_bg"
-                app:cornerRadius="12dp"
-                app:elevation="0dp" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -30,7 +30,7 @@ object RoomMapper {
         }
     }
 
-    // ✅ FIXED: Added missing actualAssetCount
+    // ✅ COMPLETE: All fields for Room
     fun toFirestoreMap(room: Room): Map<String, Any?> = mapOf(
         "name" to room.name,
         "code" to room.code,
@@ -43,7 +43,7 @@ object RoomMapper {
         "fullPath" to room.fullPath,
         "qrCode" to room.qrCode,
         "expectedAssetCount" to room.expectedAssetCount,
-        "actualAssetCount" to room.actualAssetCount, // ✅ ADDED
+        "actualAssetCount" to room.actualAssetCount,
         "isActive" to room.isActive,
         "createdAtMillis" to (room.createdAtMillis ?: System.currentTimeMillis()),
         "updatedAtMillis" to System.currentTimeMillis()

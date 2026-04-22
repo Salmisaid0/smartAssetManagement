@@ -22,6 +22,7 @@ import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class InventoryAssetScanFragment : Fragment() {
@@ -29,10 +30,8 @@ class InventoryAssetScanFragment : Fragment() {
     private var _binding: FragmentInventoryAssetScanBinding? = null
     private val binding get() = _binding!!
 
-    // ✅ FIX: Use activityViewModels to share state with RoomScanFragment
     private val viewModel: InventoryViewModel by activityViewModels()
 
-    // ✅ FIX: Replaced SafeArgs with standard Bundle extraction
     private val sessionId: String by lazy {
         requireArguments().getString("sessionId") ?: ""
     }
@@ -71,6 +70,7 @@ class InventoryAssetScanFragment : Fragment() {
 
         val callback = object : BarcodeCallback {
             override fun barcodeResult(result: BarcodeResult) {
+                Timber.d("📷 QR Scanned: ${result.text}")
                 barcodeView?.pause()
                 viewModel.processAssetScan(result.text)
             }
@@ -83,6 +83,7 @@ class InventoryAssetScanFragment : Fragment() {
         barcodeView?.decodeContinuous(callback)
     }
 
+
     private fun setupButtons() {
         binding.btnComplete.setOnClickListener { showCompletionConfirmDialog() }
         binding.btnCancel.setOnClickListener { showCancelConfirmDialog() }
@@ -93,9 +94,10 @@ class InventoryAssetScanFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
 
+                    // Update session info
                     state.session?.let { session ->
                         binding.textRoomName.text = session.roomName
-                        binding.textRoomPath.text = session.getFormattedPath()
+                        binding.textRoomPath.text = session.roomPath
 
                         val percentage = session.getCompletionPercentage()
                         binding.textProgress.text = "$percentage%"
@@ -107,16 +109,18 @@ class InventoryAssetScanFragment : Fragment() {
                         binding.btnComplete.isEnabled = session.scannedAssetCount > 0
                     }
 
+                    // Update scanned assets list
                     scannedAdapter.submitList(state.scannedAssets)
 
+                    // Handle scan result
                     state.lastScanResult?.let { result ->
                         when (result) {
                             is ScanAssetUseCase.ScanResult.Success -> {
-                                showScanFeedback("✓ Scanned: ${result.scan.assetName}", true)
+                                showScanFeedback("✓ ${result.scan.assetName}", true)
                                 barcodeView?.resume()
                             }
                             is ScanAssetUseCase.ScanResult.Duplicate -> {
-                                showScanFeedback("⚠ Duplicate: ${result.assetName}", false)
+                                showScanFeedback("⚠ Already scanned: ${result.assetName}", false)
                                 barcodeView?.resume()
                             }
                             is ScanAssetUseCase.ScanResult.WrongRoom -> {
@@ -128,19 +132,21 @@ class InventoryAssetScanFragment : Fragment() {
                                 barcodeView?.resume()
                             }
                             is ScanAssetUseCase.ScanResult.Error -> {
-                                showScanFeedback("✗ Error: ${result.message}", false)
+                                showScanFeedback("✗ ${result.message}", false)
                                 barcodeView?.resume()
                             }
                         }
                     }
 
+                    // Handle missing assets dialog
                     if (state.showMissingDialog) {
                         showMissingAssetsDialog(state.missingAssets)
                         viewModel.dismissMissingDialog()
                     }
 
+                    // Handle errors
                     state.error?.let { error ->
-                        Toast.makeText(requireContext(), error ?: "Unknown error", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
                         viewModel.clearError()
                         barcodeView?.resume()
                     }
@@ -148,6 +154,8 @@ class InventoryAssetScanFragment : Fragment() {
             }
         }
     }
+
+
 
     private fun showScanFeedback(message: String, isSuccess: Boolean) {
         binding.textFeedback.text = message
@@ -199,12 +207,10 @@ class InventoryAssetScanFragment : Fragment() {
             .setTitle("Inventory Complete")
             .setMessage("$message\n\n${missingAssets.size} assets missing")
             .setPositiveButton("View Details") { _, _ ->
-                // ✅ FIX: Replaced SafeArgs Directions with standard Bundle
                 val bundle = Bundle().apply {
                     putString("sessionId", sessionId)
                 }
-                // Make sure R.id.missingAssetsFragment exists in your nav_graph.xml
-                findNavController().navigate(R.id.missingAssetsFragment, bundle)
+                findNavController().navigate(R.id.inventoryMissingAssetsFragment, bundle)
             }
             .setNegativeButton("Close") { _, _ -> findNavController().navigateUp() }
             .show()

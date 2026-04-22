@@ -3,6 +3,7 @@ package com.etachi.smartassetmanagement.ui.organigramme.model
 import com.etachi.smartassetmanagement.domain.model.Department
 import com.etachi.smartassetmanagement.domain.model.Direction
 import com.etachi.smartassetmanagement.domain.model.Room
+import timber.log.Timber
 
 object OrganigrammeTreeBuilder {
 
@@ -12,16 +13,19 @@ object OrganigrammeTreeBuilder {
         rooms: List<Room>,
         expandedIds: Set<String> = emptySet()
     ): List<OrganigrammeNode> {
+        Timber.d("🌳 [BUILDER] Building tree: ${directions.size} dirs, ${departments.size} depts, ${rooms.size} rooms")
+
         val nodes = mutableListOf<OrganigrammeNode>()
 
-        // Build O(1) lookup maps for children
+        // Build O(1) lookup maps
         val deptByDirection = departments.groupBy { it.directionId }
         val roomsByDepartment = rooms.groupBy { it.departmentId }
+
+        Timber.d("🌳 [BUILDER] Grouped: ${deptByDirection.size} direction groups, ${roomsByDepartment.size} department groups")
 
         for (direction in directions) {
             val childDepts = deptByDirection[direction.id] ?: emptyList()
 
-            // Direction node (Level 0 - always visible)
             nodes.add(
                 OrganigrammeNode(
                     id = direction.id,
@@ -36,12 +40,10 @@ object OrganigrammeTreeBuilder {
                 )
             )
 
-            // Only show children if this Direction is expanded
             if (direction.id in expandedIds) {
                 for (dept in childDepts) {
                     val childRooms = roomsByDepartment[dept.id] ?: emptyList()
 
-                    // Department node (Level 1)
                     nodes.add(
                         OrganigrammeNode(
                             id = dept.id,
@@ -57,10 +59,8 @@ object OrganigrammeTreeBuilder {
                         )
                     )
 
-                    // Only show children if this Department is expanded
                     if (dept.id in expandedIds) {
                         for (room in childRooms) {
-                            // Room node (Level 2)
                             nodes.add(
                                 OrganigrammeNode(
                                     id = room.id,
@@ -69,7 +69,7 @@ object OrganigrammeTreeBuilder {
                                     type = NodeType.ROOM,
                                     parentId = dept.id,
                                     level = 2,
-                                    isExpanded = false, // Rooms don't expand
+                                    isExpanded = false,
                                     childCount = 0,
                                     fullPath = room.fullPath,
                                     assetCount = room.expectedAssetCount,
@@ -82,6 +82,7 @@ object OrganigrammeTreeBuilder {
             }
         }
 
+        Timber.d("🌳 [BUILDER] Tree built with ${nodes.size} nodes")
         return nodes
     }
 }

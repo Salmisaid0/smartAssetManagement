@@ -17,38 +17,40 @@ class AssetAdapter(
     inner class AssetViewHolder(private val binding: ItemAssetBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(asset: Asset) {
+            // Asset Name
             binding.textAssetName.text = asset.name
-            binding.textAssetDetails.text = "${asset.location} · ${asset.serialNumber}" // Changed to middle dot
 
-            // PRO TIP: Extract 2 letters for a better logo feel (e.g., "Dell XPS" -> "DX")
-            val words = asset.name.split(" ")
-            val initials = if (words.size >= 2) {
-                "${words[0].firstOrNull()}${words[1].firstOrNull()}".uppercase()
-            } else {
-                asset.name.take(2).uppercase()
+            // Asset Details (Location + Serial)
+            binding.textAssetDetails.text = buildString {
+                if (asset.location.isNotEmpty()) append(asset.location)
+                if (asset.serialNumber.isNotEmpty()) {
+                    if (isNotEmpty()) append(" • ")
+                    append(asset.serialNumber)
+                }
+                if (isEmpty()) append("No details")
             }
-            binding.textInitial.text = initials
 
-            // Apply Dynamic Colors to the Chip based on Status
+            // Status Text
+            binding.textStatus.text = asset.status
+
+            // Status Color (Main color only)
             val context = binding.root.context
-            when (asset.status.lowercase()) {
-                "active" -> {
-                    binding.chipStatus.setChipBackgroundColorResource(R.color.md_theme_light_success) // Or your specific green container color
-                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_success)) // Or your specific green text color
-                }
-                "maintenance" -> {
-                    binding.chipStatus.setChipBackgroundColorResource(R.color.dash_amber) // Make sure these exist in colors.xml
-                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.dash_amber))
-                }
-                else -> { // Retired or unknown
-                    binding.chipStatus.setChipBackgroundColorResource(R.color.md_theme_light_onSurfaceVariant)
-                    binding.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onSurfaceVariant))
-                }
+            binding.textStatus.setTextColor(
+                ContextCompat.getColor(context, R.color.dash_teal)
+            )
+
+            // Status Indicator Color (Left bar)
+            val indicatorColor = when (asset.status.lowercase()) {
+                "active" -> R.color.dash_teal
+                "maintenance" -> R.color.dash_amber
+                "retired" -> R.color.dash_text_hint
+                else -> R.color.dash_teal
             }
+            binding.viewStatusIndicator.setBackgroundColor(
+                ContextCompat.getColor(context, indicatorColor)
+            )
 
-            // Set text AFTER colors to prevent visual glitches
-            binding.chipStatus.text = asset.status
-
+            // Click Listener
             binding.root.setOnClickListener { onItemClick(asset) }
         }
     }

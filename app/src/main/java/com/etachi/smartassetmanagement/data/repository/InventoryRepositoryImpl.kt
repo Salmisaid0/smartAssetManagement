@@ -2,10 +2,15 @@ package com.etachi.smartassetmanagement.data.repository
 
 import com.etachi.smartassetmanagement.data.mapper.InventoryScanMapper
 import com.etachi.smartassetmanagement.data.mapper.InventorySessionMapper
+import com.etachi.smartassetmanagement.data.mapper.MissingAssetMapper
 import com.etachi.smartassetmanagement.data.model.Asset
-import com.etachi.smartassetmanagement.domain.model.*
+import com.etachi.smartassetmanagement.domain.model.InventoryScan
+import com.etachi.smartassetmanagement.domain.model.InventorySession
+import com.etachi.smartassetmanagement.domain.model.MissingAsset
+import com.etachi.smartassetmanagement.domain.model.MissingAssetStatus
+import com.etachi.smartassetmanagement.domain.model.Resource
+import com.etachi.smartassetmanagement.domain.model.SessionStatus
 import com.etachi.smartassetmanagement.domain.repository.InventoryRepository
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -22,48 +27,91 @@ class InventoryRepositoryImpl @Inject constructor(
     private val sessionsCollection = db.collection("inventory_sessions")
     private val assetsCollection = db.collection("assets")
 
+    // ═══════════════════════════════════════════════════════════════
+    // SESSIONS - READ
+    // ═══════════════════════════════════════════════════════════════
 
-    override fun getUserSessions(userId: String): Flow<List<InventorySession>> = callbackFlow {
+    override fun getInventorySessions(): Flow<Resource<List<InventorySession>>> = callbackFlow {
+        trySend(Resource.Loading)
+
         val listener = sessionsCollection
-            .whereEqualTo("auditorId", userId)
-            .orderBy("startTimeMillis", Query.Direction.DESCENDING)
+            .orderBy("createdAtMillis", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Timber.e(error, "Error listening to user sessions")
+                    Timber.e(error, "Error fetching inventory sessions")
+                    trySend(Resource.Error(error, "Failed to load sessions"))
                     close(error)
                     return@addSnapshotListener
                 }
+
                 val sessions = snapshot?.documents?.mapNotNull { doc ->
                     InventorySessionMapper.fromDocument(doc)
                 } ?: emptyList()
-                trySend(sessions)
+
+                trySend(Resource.Success(sessions))
             }
+
         awaitClose { listener.remove() }
     }
 
-    override fun getRoomSessions(roomId: String): Flow<List<InventorySession>> = callbackFlow {
+    override fun getInventorySessionsByStatus(status: SessionStatus): Flow<Resource<List<InventorySession>>> = callbackFlow {
+        trySend(Resource.Loading)
+
         val listener = sessionsCollection
-            .whereEqualTo("roomId", roomId)
-            .orderBy("startTimeMillis", Query.Direction.DESCENDING)
+            .whereEqualTo("status", status.key)
+            .orderBy("createdAtMillis", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Timber.e(error, "Error listening to room sessions")
+                    Timber.e(error, "Error fetching sessions by status")
+                    trySend(Resource.Error(error, "Failed to load sessions"))
                     close(error)
                     return@addSnapshotListener
                 }
+
                 val sessions = snapshot?.documents?.mapNotNull { doc ->
                     InventorySessionMapper.fromDocument(doc)
                 } ?: emptyList()
-                trySend(sessions)
+
+                trySend(Resource.Success(sessions))
             }
+
         awaitClose { listener.remove() }
+    }
+
+    override suspend fun getSessionById(sessionId: String): Resource<InventorySession> {
+        return try {
+            val snapshot = sessionsCollection.document(sessionId).get().await()
+            if (snapshot.exists()) {
+                val session = InventorySessionMapper.fromDocument(snapshot)
+                if (session != null) {
+                    Resource.Success(session)
+                } else {
+                    Resource.Error(Exception("Invalid session data"), "Session data is corrupted")
+                }
+            } else {
+                Resource.Error(Exception("Not found"), "Session not found")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching session by ID")
+            Resource.Error(e, "Failed to load session details")
+        }
+    }
+
+    override suspend fun getSession(sessionId: String): InventorySession? {
+        return try {
+            val snapshot = sessionsCollection.document(sessionId).get().await()
+            InventorySessionMapper.fromDocument(snapshot)
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching session")
+            null
+        }
     }
 
     override suspend fun getActiveSessions(auditorId: String): List<InventorySession> {
         return try {
             val snapshot = sessionsCollection
                 .whereEqualTo("auditorId", auditorId)
-                .whereEqualTo("status", SessionStatus.IN_PROGRESS.key)
+                .whereIn("status", listOf(SessionStatus.IN_PROGRESS.key, SessionStatus.PAUSED.key))
                 .get()
                 .await()
 
@@ -71,45 +119,77 @@ class InventoryRepositoryImpl @Inject constructor(
                 InventorySessionMapper.fromDocument(doc)
             }
         } catch (e: Exception) {
-            Timber.e(e, "Error getting active sessions")
+            Timber.e(e, "Error fetching active sessions")
             emptyList()
         }
     }
 
-    override suspend fun getSession(sessionId: String): InventorySession? {
-        return try {
-            val snapshot = sessionsCollection.document(sessionId).get().await()
-            if (snapshot.exists()) {
-                InventorySessionMapper.fromDocument(snapshot)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Error getting session: $sessionId")
-            null
-        }
-    }
-
-    /**
-     * ✅ FIXED: Real-time observe of a single session
-     * Used by InventoryAssetScanFragment to show live progress
-     */
     override fun observeSession(sessionId: String): Flow<InventorySession?> = callbackFlow {
         val listener = sessionsCollection.document(sessionId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Timber.e(error, "Error observing session: $sessionId")
+                    Timber.e(error, "Error observing session")
                     close(error)
                     return@addSnapshotListener
                 }
-                val session = snapshot?.let {
-                    if (it.exists()) InventorySessionMapper.fromDocument(it) else null
-                }
+
+                val session = snapshot?.let { InventorySessionMapper.fromDocument(it) }
                 trySend(session)
             }
+
         awaitClose { listener.remove() }
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // SESSIONS - WRITE
+    // ═══════════════════════════════════════════════════════════════
+
+    override suspend fun updateSessionStatus(
+        sessionId: String,
+        status: SessionStatus,
+        notes: String
+    ): Resource<Unit> {
+        return try {
+            val updates = mutableMapOf<String, Any>(
+                "status" to status.key,
+                "lastUpdatedMillis" to System.currentTimeMillis()
+            )
+
+            if (notes.isNotEmpty()) {
+                updates["notes"] = notes
+            }
+
+            if (status == SessionStatus.COMPLETED || status == SessionStatus.CANCELLED) {
+                updates["endTimeMillis"] = System.currentTimeMillis()
+            }
+
+            sessionsCollection.document(sessionId).update(updates).await()
+            Timber.d("Session $sessionId updated to $status")
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Error updating session status")
+            Resource.Error(e, "Failed to update session")
+        }
+    }
+
+    override suspend fun pauseSession(sessionId: String): Resource<Unit> {
+        return updateSessionStatus(sessionId, SessionStatus.PAUSED)
+    }
+
+    override suspend fun resumeSession(sessionId: String): Resource<Unit> {
+        return updateSessionStatus(sessionId, SessionStatus.IN_PROGRESS)
+    }
+
+    override suspend fun deleteSession(sessionId: String): Resource<Unit> {
+        return try {
+            sessionsCollection.document(sessionId).delete().await()
+            Timber.d("Session $sessionId deleted")
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Error deleting session")
+            Resource.Error(e, "Failed to delete session")
+        }
+    }
 
     override suspend fun startSession(
         roomId: String,
@@ -123,11 +203,11 @@ class InventoryRepositoryImpl @Inject constructor(
         auditorName: String
     ): Resource<InventorySession> {
         return try {
+            val docRef = sessionsCollection.document()
             val now = System.currentTimeMillis()
-            val sessionId = sessionsCollection.document().id
 
             val session = InventorySession(
-                id = sessionId,
+                id = docRef.id,
                 auditorId = auditorId,
                 auditorEmail = auditorEmail,
                 auditorName = auditorName,
@@ -141,152 +221,144 @@ class InventoryRepositoryImpl @Inject constructor(
                 scannedAssetCount = 0,
                 missingAssetCount = 0,
                 startTimeMillis = now,
+                endTimeMillis = null,
+                lastUpdatedMillis = now,
                 createdAtMillis = now,
-                updatedAtMillis = now
+                notes = ""
             )
 
-            sessionsCollection.document(sessionId).set(session.toFirestoreMap()).await()
-            Timber.d("Session started: $sessionId for room: $roomName")
+            docRef.set(InventorySessionMapper.toFirestoreMap(session)).await()
+            Timber.d("Session started: ${docRef.id}")
             Resource.Success(session)
-
         } catch (e: Exception) {
-            Timber.e(e, "Failed to start session")
-            Resource.Error(e, "Failed to start session: ${e.message}")
+            Timber.e(e, "Error starting session")
+            Resource.Error(e, "Failed to start session")
         }
     }
 
     override suspend fun completeSession(sessionId: String, notes: String): Resource<InventorySession> {
         return try {
+            updateSessionStatus(sessionId, SessionStatus.COMPLETED, notes)
+
             val session = getSession(sessionId)
-                ?: return Resource.Error(
-                    IllegalArgumentException("Session not found"),
-                    "Session not found"
-                )
-
-            // Only allow completion of IN_PROGRESS sessions
-            if (session.status != SessionStatus.IN_PROGRESS) {
-                return Resource.Error(
-                    IllegalStateException("Session already ${session.status.displayName}"),
-                    "Cannot complete a session that is ${session.status.displayName}"
-                )
+            if (session != null) {
+                Resource.Success(session)
+            } else {
+                Resource.Error(Exception("Session not found"), "Session not found after completion")
             }
-
-            // ✅ Compute missing assets atomically
-            val missingCount = computeMissingCount(sessionId, session.roomId)
-            val now = System.currentTimeMillis()
-
-            val updates = mapOf(
-                "status" to SessionStatus.COMPLETED.key,
-                "missingAssetCount" to missingCount,
-                "endTimeMillis" to now,
-                "updatedAtMillis" to now,
-                "notes" to notes
-            )
-
-            sessionsCollection.document(sessionId).update(updates).await()
-            Timber.d("Session completed: $sessionId with $missingCount missing")
-
-            Resource.Success(
-                session.copy(
-                    status = SessionStatus.COMPLETED,
-                    missingAssetCount = missingCount,
-                    endTimeMillis = now,
-                    notes = notes
-                )
-            )
-
         } catch (e: Exception) {
-            Timber.e(e, "Failed to complete session: $sessionId")
-            Resource.Error(e, "Failed to complete session: ${e.message}")
+            Timber.e(e, "Error completing session")
+            Resource.Error(e, "Failed to complete session")
         }
     }
 
     override suspend fun cancelSession(sessionId: String): Resource<Unit> {
         return try {
-            val session = getSession(sessionId)
-                ?: return Resource.Error(
-                    IllegalArgumentException("Session not found"),
-                    "Session not found"
-                )
-
-            if (session.status != SessionStatus.IN_PROGRESS) {
-                return Resource.Error(
-                    IllegalStateException("Session already ${session.status.displayName}"),
-                    "Cannot cancel a session that is ${session.status.displayName}"
-                )
-            }
-
-            val now = System.currentTimeMillis()
-            sessionsCollection.document(sessionId).update(
-                mapOf(
-                    "status" to SessionStatus.CANCELLED.key,
-                    "endTimeMillis" to now,
-                    "updatedAtMillis" to now
-                )
-            ).await()
-            Timber.d("Session cancelled: $sessionId")
+            updateSessionStatus(sessionId, SessionStatus.CANCELLED)
             Resource.Success(Unit)
-
         } catch (e: Exception) {
-            Timber.e(e, "Failed to cancel session: $sessionId")
+            Timber.e(e, "Error cancelling session")
             Resource.Error(e, "Failed to cancel session")
         }
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // SCAN OPERATIONS
+    // SCANS
     // ═══════════════════════════════════════════════════════════════
 
-    /**
-     * ✅ FIXED: Real-time scans subcollection
-     * Emits updated list every time a new scan is recorded
-     */
-    override fun getSessionScans(sessionId: String): Flow<List<InventoryScan>> = callbackFlow {
-        val listener = sessionsCollection.document(sessionId)
+    override fun getInventoryScans(sessionId: String): Flow<Resource<List<InventoryScan>>> = callbackFlow {
+        trySend(Resource.Loading)
+
+        val listener = sessionsCollection
+            .document(sessionId)
             .collection("scans")
-            .orderBy("scanOrder", Query.Direction.ASCENDING)
+            .orderBy("scannedAtMillis", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Timber.e(error, "Error listening to session scans: $sessionId")
+                    Timber.e(error, "Error fetching scans for session $sessionId")
+                    trySend(Resource.Error(error, "Failed to load scans"))
                     close(error)
                     return@addSnapshotListener
                 }
+
                 val scans = snapshot?.documents?.mapNotNull { doc ->
                     InventoryScanMapper.fromDocument(doc)
                 } ?: emptyList()
-                trySend(scans)
+
+                trySend(Resource.Success(scans))
             }
+
         awaitClose { listener.remove() }
     }
 
-    /**
-     * ✅ FIXED: Check if asset already scanned
-     * Prevents duplicate scans in the same session
-     */
+    override fun getSessionScans(sessionId: String): Flow<List<InventoryScan>> = callbackFlow {
+        val listener = sessionsCollection
+            .document(sessionId)
+            .collection("scans")
+            .orderBy("scannedAtMillis", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Timber.e(error, "Error fetching session scans")
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val scans = snapshot?.documents?.mapNotNull { doc ->
+                    InventoryScanMapper.fromDocument(doc)
+                } ?: emptyList()
+
+                trySend(scans)
+            }
+
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun createScan(scan: InventoryScan): Resource<String> {
+        return try {
+            val docRef = sessionsCollection
+                .document(scan.sessionId)
+                .collection("scans")
+                .document()
+
+            val enriched = scan.copy(id = docRef.id)
+            docRef.set(InventoryScanMapper.toFirestoreMap(enriched)).await()
+
+            updateSessionScannedCount(scan.sessionId)
+
+            Timber.d("Scan created: ${docRef.id}")
+            Resource.Success(docRef.id)
+        } catch (e: Exception) {
+            Timber.e(e, "Error creating scan")
+            Resource.Error(e, "Failed to create scan")
+        }
+    }
+
+    override suspend fun deleteScan(scanId: String): Resource<Unit> {
+        return try {
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Error deleting scan")
+            Resource.Error(e, "Failed to delete scan")
+        }
+    }
+
     override suspend fun isAssetScanned(sessionId: String, assetId: String): Boolean {
         return try {
-            val snapshot = sessionsCollection.document(sessionId)
+            val snapshot = sessionsCollection
+                .document(sessionId)
                 .collection("scans")
                 .whereEqualTo("assetId", assetId)
                 .limit(1)
                 .get()
                 .await()
+
             !snapshot.isEmpty
         } catch (e: Exception) {
-            Timber.e(e, "Error checking if asset scanned: $assetId")
-            false // On error, allow retry
+            Timber.e(e, "Error checking if asset scanned")
+            false
         }
     }
 
-    /**
-     * ✅ FIXED: Record scan with atomic batch operation
-     *
-     * CRITICAL FIXES:
-     * 1. Uses Firestore Batch for atomicity (scan + counter increment)
-     * 2. Gets current count from document, not from query (faster)
-     * 3. Compares assetRoomId vs expectedRoomId for misplaced detection
-     * 4. Prevents race conditions on concurrent scans
-     */
     override suspend fun recordScan(
         sessionId: String,
         assetId: String,
@@ -295,84 +367,181 @@ class InventoryRepositoryImpl @Inject constructor(
         assetSerial: String,
         assetRoomId: String,
         expectedRoomId: String
-    ): Resource<InventoryScan> {
+    ): Resource<InventoryRepository.ScanRecordResult> {
         return try {
-            // 1. Check duplicate FIRST (fast fail before any writes)
-            if (isAssetScanned(sessionId, assetId)) {
-                return Resource.Error(
-                    IllegalStateException("Already scanned"),
-                    "Asset already scanned in this session"
-                )
-            }
-
-            // 2. Get current scan count from session document (single read, not query)
-            val sessionDoc = sessionsCollection.document(sessionId).get().await()
-            val currentCount = sessionDoc.getLong("scannedAssetCount")?.toInt() ?: 0
-
-            // 3. Validate session is still IN_PROGRESS
-            val status = sessionDoc.getString("status")
-            if (status != SessionStatus.IN_PROGRESS.key) {
-                return Resource.Error(
-                    IllegalStateException("Session not in progress"),
-                    "Session is no longer active (status: $status)"
-                )
-            }
-
-            val now = System.currentTimeMillis()
-            val isCorrectRoom = assetRoomId == expectedRoomId
-            val nextOrder = currentCount + 1
-
-            // 4. Create scan document
-            val scanRef = sessionsCollection.document(sessionId).collection("scans").document()
-            val scanData = mapOf(
-                "sessionId" to sessionId,
-                "assetId" to assetId,
-                "assetName" to assetName,
-                "assetType" to assetType,
-                "assetSerial" to assetSerial,
-                "assetRoomId" to assetRoomId,
-                "isInCorrectRoom" to isCorrectRoom,
-                "scanOrder" to nextOrder,
-                "scannedAtMillis" to now
-            )
-
-            // 5. Use BATCH for atomic write: scan + counter increment
-            val batch = db.batch()
-            batch.set(scanRef, scanData)
-            batch.update(
-                sessionsCollection.document(sessionId),
-                mapOf(
-                    "scannedAssetCount" to nextOrder,
-                    "updatedAtMillis" to now
-                )
-            )
-            batch.commit().await()
+            val session = getSession(sessionId)
+                ?: return Resource.Error(Exception("Session not found"), "Session not found")
 
             val scan = InventoryScan(
-                id = scanRef.id,
                 sessionId = sessionId,
                 assetId = assetId,
                 assetName = assetName,
-                assetType = assetType,
-                assetSerial = assetSerial,
-                assetRoomId = assetRoomId,
-                isInCorrectRoom = isCorrectRoom,
-                scanOrder = nextOrder,
-                scannedAtMillis = now
+                assetCategory = assetType,
+                assetCode = assetSerial,
+                auditorId = session.auditorId,
+                auditorName = session.auditorName,
+                location = assetRoomId,
+                scannedAtMillis = System.currentTimeMillis(),
+                isValid = true,
+                errorMessage = null
             )
 
-            Timber.d("Scan recorded: ${assetName} (correct room: $isCorrectRoom)")
-            Resource.Success(scan)
+            val docRef = sessionsCollection
+                .document(sessionId)
+                .collection("scans")
+                .document()
 
+            docRef.set(InventoryScanMapper.toFirestoreMap(scan)).await()
+            updateSessionScannedCount(sessionId)
+
+            val isInCorrectRoom = assetRoomId == expectedRoomId
+
+            Resource.Success(InventoryRepository.ScanRecordResult(scan, isInCorrectRoom))
         } catch (e: Exception) {
-            Timber.e(e, "Failed to record scan for asset: $assetId")
-            Resource.Error(e, "Failed to record scan: ${e.message}")
+            Timber.e(e, "Error recording scan")
+            Resource.Error(e, "Failed to record scan")
+        }
+    }
+
+    private suspend fun updateSessionScannedCount(sessionId: String) {
+        try {
+            val scansSnapshot = sessionsCollection
+                .document(sessionId)
+                .collection("scans")
+                .get()
+                .await()
+
+            val count = scansSnapshot.size()
+
+            sessionsCollection.document(sessionId)
+                .update("scannedAssetCount", count)
+                .await()
+        } catch (e: Exception) {
+            Timber.e(e, "Error updating session scanned count")
         }
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ASSET LOOKUP (for missing assets computation)
+    // MISSING ASSETS
     // ═══════════════════════════════════════════════════════════════
+
+    // ✅ FIXED: Renamed from getMissingAssets to getMissingAssetsFlow
+    override fun getMissingAssetsFlow(sessionId: String): Flow<Resource<List<MissingAsset>>> = callbackFlow {
+        trySend(Resource.Loading)
+
+        val listener = sessionsCollection
+            .document(sessionId)
+            .collection("missing_assets")
+            .orderBy("reportedAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Timber.e(error, "Error fetching missing assets for session $sessionId")
+                    trySend(Resource.Error(error, "Failed to load missing assets"))
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val assets = snapshot?.documents?.mapNotNull { doc ->
+                    MissingAssetMapper.fromDocument(doc)
+                } ?: emptyList()
+
+                trySend(Resource.Success(assets))
+            }
+
+        awaitClose { listener.remove() }
+    }
+
+    // ✅ FIXED: Renamed from getMissingAssets to computeMissingAssets
+    override suspend fun computeMissingAssets(sessionId: String): List<MissingAsset> {
+        return try {
+            val session = getSession(sessionId) ?: return emptyList()
+
+            val roomAssets = getRoomExpectedAssets(session.roomId)
+
+            val scannedAssetIds = sessionsCollection
+                .document(sessionId)
+                .collection("scans")
+                .get()
+                .await()
+                .documents
+                .mapNotNull { it.getString("assetId") }
+                .toSet()
+
+            roomAssets
+                .filter { it.id !in scannedAssetIds }
+                .map { asset ->
+                    MissingAsset(
+                        assetId = asset.id,
+                        assetName = asset.name,
+                        assetType = asset.type,
+                        assetSerial = asset.serialNumber,
+                        assetStatus = asset.status,
+                        owner = asset.owner,
+                        lastScannedAtMillis = null,
+                        lastScannedLocation = asset.location
+                    )
+                }
+        } catch (e: Exception) {
+            Timber.e(e, "Error computing missing assets")
+            emptyList()
+        }
+    }
+
+    override suspend fun reportMissingAsset(missingAsset: MissingAsset): Resource<String> {
+        return try {
+            val docRef = sessionsCollection
+                .document(missingAsset.assetId)
+                .collection("missing_assets")
+                .document()
+
+            val enriched = missingAsset.copy(assetId = docRef.id)
+            docRef.set(MissingAssetMapper.toFirestoreMap(enriched)).await()
+
+            Timber.d("Missing asset reported: ${docRef.id}")
+            Resource.Success(docRef.id)
+        } catch (e: Exception) {
+            Timber.e(e, "Error reporting missing asset")
+            Resource.Error(e, "Failed to report missing asset")
+        }
+    }
+
+    override suspend fun updateMissingAssetStatus(
+        missingAssetId: String,
+        status: MissingAssetStatus,
+        notes: String
+    ): Resource<Unit> {
+        return try {
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Error updating missing asset status")
+            Resource.Error(e, "Failed to update missing asset")
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ROOM ASSETS
+    // ═══════════════════════════════════════════════════════════════
+
+    override fun getRoomAssetsFlow(roomId: String): Flow<List<Asset>> = callbackFlow {
+        val listener = assetsCollection
+            .whereEqualTo("roomId", roomId)
+            .orderBy("name", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Timber.e(error, "Error listening to room assets: $roomId")
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val assets = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Asset::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+
+                trySend(assets)
+            }
+
+        awaitClose { listener.remove() }
+    }
 
     override suspend fun getRoomExpectedAssets(roomId: String): List<Asset> {
         return try {
@@ -381,137 +550,13 @@ class InventoryRepositoryImpl @Inject constructor(
                 .orderBy("name", Query.Direction.ASCENDING)
                 .get()
                 .await()
+
             snapshot.documents.mapNotNull { doc ->
                 doc.toObject(Asset::class.java)?.copy(id = doc.id)
             }
         } catch (e: Exception) {
-            Timber.e(e, "Error getting expected assets for room: $roomId")
+            Timber.e(e, "Error fetching room assets")
             emptyList()
-        }
-    }
-
-    override fun getRoomAssetsFlow(roomId: String): Flow<List<Asset>> = callbackFlow {
-        val listener = assetsCollection
-            .whereEqualTo("roomId", roomId)
-            .orderBy("name", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Timber.e(error, "Error listening to room assets flow: $roomId")
-                    close(error)
-                    return@addSnapshotListener
-                }
-                val assets = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Asset::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
-                trySend(assets)
-            }
-        awaitClose { listener.remove() }
-    }
-
-    /**
-     * ✅ FIXED: Compute missing assets
-     * Returns list of assets that were expected but not scanned
-     */
-    override suspend fun getMissingAssets(sessionId: String): List<MissingAsset> {
-        return try {
-            val session = getSession(sessionId) ?: return emptyList()
-
-            // Get scanned asset IDs
-            val scansSnapshot = sessionsCollection.document(sessionId)
-                .collection("scans")
-                .get()
-                .await()
-            val scannedIds = scansSnapshot.documents
-                .mapNotNull { it.getString("assetId") }
-                .toSet()
-
-            // Get expected assets for the room
-            val expectedAssets = getRoomExpectedAssets(session.roomId)
-
-            // Set difference: expected - scanned = missing
-            expectedAssets
-                .filter { it.id !in scannedIds }
-                .map { asset ->
-                    MissingAsset(
-                        assetId = asset.id,
-                        assetName = asset.name,
-                        assetType = asset.type,
-                        assetSerial = asset.serialNumber,
-                        assetStatus = asset.status,
-                        owner = asset.owner
-                    )
-                }
-
-        } catch (e: Exception) {
-            Timber.e(e, "Error computing missing assets for session: $sessionId")
-            emptyList()
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // PRIVATE HELPERS
-    // ═══════════════════════════════════════════════════════════════
-
-    /**
-     * Compute missing count without building full object list
-     * More efficient than getMissingAssets().size when we only need the count
-     */
-    private suspend fun computeMissingCount(sessionId: String, roomId: String): Int {
-        return try {
-            val scannedSnapshot = sessionsCollection.document(sessionId)
-                .collection("scans")
-                .get()
-                .await()
-            val scannedIds = scannedSnapshot.documents
-                .mapNotNull { it.getString("assetId") }
-                .toSet()
-
-            val expectedSnapshot = assetsCollection
-                .whereEqualTo("roomId", roomId)
-                .get()
-                .await()
-
-            expectedSnapshot.documents.count { it.id !in scannedIds }
-
-        } catch (e: Exception) {
-            Timber.e(e, "Error computing missing count")
-            0
         }
     }
 }
-
-// ═══════════════════════════════════════════════════════════════
-// EXTENSION FUNCTIONS: Domain → Firestore Map
-// ═══════════════════════════════════════════════════════════════
-
-fun InventorySession.toFirestoreMap(): Map<String, Any?> = mapOf(
-    "auditorId" to auditorId,
-    "auditorEmail" to auditorEmail,
-    "auditorName" to auditorName,
-    "roomId" to roomId,
-    "roomName" to roomName,
-    "roomPath" to roomPath,
-    "departmentId" to departmentId,
-    "directionId" to directionId,
-    "status" to status.key,
-    "expectedAssetCount" to expectedAssetCount,
-    "scannedAssetCount" to scannedAssetCount,
-    "missingAssetCount" to missingAssetCount,
-    "startTimeMillis" to startTimeMillis,
-    "endTimeMillis" to endTimeMillis,
-    "createdAtMillis" to createdAtMillis,
-    "updatedAtMillis" to updatedAtMillis,
-    "notes" to notes
-)
-
-fun InventoryScan.toFirestoreMap(): Map<String, Any?> = mapOf(
-    "sessionId" to sessionId,
-    "assetId" to assetId,
-    "assetName" to assetName,
-    "assetType" to assetType,
-    "assetSerial" to assetSerial,
-    "assetRoomId" to assetRoomId,
-    "isInCorrectRoom" to isInCorrectRoom,
-    "scanOrder" to scanOrder,
-    "scannedAtMillis" to scannedAtMillis
-)

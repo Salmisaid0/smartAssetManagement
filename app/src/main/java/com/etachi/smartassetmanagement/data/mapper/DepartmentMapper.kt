@@ -23,7 +23,7 @@ object DepartmentMapper {
         }
     }
 
-    // ✅ ADDED: This function was MISSING!
+    // ✅ COMPLETE: All fields including directionCode and directionName
     fun toFirestoreMap(department: Department): Map<String, Any?> = mapOf(
         "name" to department.name,
         "code" to department.code,

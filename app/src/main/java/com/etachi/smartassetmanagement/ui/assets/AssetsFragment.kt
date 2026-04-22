@@ -7,11 +7,12 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.data.model.Asset
@@ -34,8 +35,11 @@ class AssetsFragment : Fragment() {
     private var _binding: FragmentAssetsBinding? = null
     private val binding get() = _binding!!
 
-    // Activity-scoped to receive filter from OrganigramFragment
-    private val viewModel: AssetViewModel by activityViewModels()
+    // ✅ FIXED: Fragment-scoped (not activity-scoped)
+    private val viewModel: AssetViewModel by viewModels()
+
+    // ✅ ADDED: For navigation args from Organigramme
+    private val args: AssetsFragmentArgs by navArgs()
 
     private lateinit var assetAdapter: AssetAdapter
 
@@ -49,21 +53,24 @@ class AssetsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // ✅ Check if coming from Organigramme with room filter
+        val roomId = args.roomId
+        if (!roomId.isNullOrEmpty()) {
+            viewModel.setRoomFilter(roomId)
+        }
+
         setupRecyclerView()
         setupSearchInput()
         setupSwipeRefresh()
         setupClickListeners()
+        setupFilterChips()
         setupObservers()
     }
 
     private fun setupRecyclerView() {
         assetAdapter = AssetAdapter(
-            onItemClick = { asset: Asset ->
-                try {
-                    findNavController().navigate(R.id.assetDetailFragment)
-                } catch (e: Exception) {
-                    // Silent catch
-                }
+            onItemClick = { asset ->
+                navigateToAssetDetail(asset)
             }
         )
 
@@ -78,42 +85,42 @@ class AssetsFragment : Fragment() {
         binding.editTextSearch.textChanges()
             .debounce(300)
             .onEach { query ->
-                try {
-                    viewModel.setSearchQuery(query.toString())
-                } catch (e: Exception) {
-                    // Ignore
-                }
+                viewModel.setSearchQuery(query.toString())
             }
             .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun setupSwipeRefresh() {
         binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refreshAssets()
             binding.swipeRefresh.isRefreshing = false
         }
     }
 
     private fun setupClickListeners() {
         binding.btnScan.setOnClickListener {
-            // TODO: Add scanner intent when ready
+            findNavController().navigate(R.id.navigation_scanner)
         }
 
         binding.fabAdd.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.addAssetFragment)
-            } catch (e: Exception) {
-                // Handle error
-            }
+            navigateToAddAsset()
         }
 
-        binding.btnEmptyAdd.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.addAssetFragment)
-            } catch (e: Exception) {
-                // Handle error
+
+    }
+
+    private fun setupFilterChips() {
+        binding.chipGroupStatus.setOnCheckedStateChangeListener { group, checkedIds ->
+            val status = when (checkedIds.firstOrNull()) {
+                R.id.chipAll -> null
+                R.id.chipActive -> "Active"
+                R.id.chipMaintenance -> "Maintenance"
+                R.id.chipRetired -> "Retired"
+                else -> null
             }
+            viewModel.setStatusFilter(status)
         }
-    } // ✅ THIS WAS MISSING!
+    }
 
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -124,18 +131,25 @@ class AssetsFragment : Fragment() {
     }
 
     private suspend fun observeAssets() {
-        try {
-            viewModel.assets.collect { assets ->
-                assetAdapter.submitList(assets)
+        viewModel.assets.collect { assets ->
+            assetAdapter.submitList(assets)
 
-                val isEmpty = assets.isEmpty()
-                binding.emptyStateView.isVisible = isEmpty
-                binding.recyclerViewAssets.isVisible = !isEmpty
-                binding.textResultCount.text = "${assets.size} asset${if (assets.size != 1) "s" else ""}"
-            }
-        } catch (e: Exception) {
-            // Fallback
+            val isEmpty = assets.isEmpty()
+            binding.emptyStateView.isVisible = isEmpty
+            binding.recyclerViewAssets.isVisible = !isEmpty
         }
+    }
+
+    private fun navigateToAssetDetail(asset: Asset) {
+        val action = AssetsFragmentDirections
+            .actionAssetsFragmentToAssetDetailFragment(asset.id)
+        findNavController().navigate(action)
+    }
+
+    private fun navigateToAddAsset() {
+        val action = AssetsFragmentDirections
+            .actionAssetsFragmentToAddAssetFragment(null)
+        findNavController().navigate(action)
     }
 
     override fun onDestroyView() {

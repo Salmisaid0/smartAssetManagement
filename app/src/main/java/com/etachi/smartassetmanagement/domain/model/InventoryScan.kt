@@ -1,4 +1,3 @@
-// File: domain/model/InventoryScan.kt
 package com.etachi.smartassetmanagement.domain.model
 
 import android.os.Parcelable
@@ -10,12 +9,13 @@ data class InventoryScan(
     val sessionId: String = "",
     val assetId: String = "",
     val assetName: String = "",
-    val assetType: String = "",
-    val assetSerial: String = "",
-    val assetRoomId: String = "",
-    val isInCorrectRoom: Boolean = true,
-    val scanOrder: Int = 0,
-    val scannedAtMillis: Long? = null
-) : Parcelable {
-    constructor() : this("", "", "", "", "", "", "", true, 0, null)
-}
+    val assetCode: String = "",
+    val assetCategory: String = "",
+    val scannedAtMillis: Long = System.currentTimeMillis(),
+    val auditorId: String = "",
+    val auditorName: String = "",
+    val location: String = "",
+    val notes: String = "",
+    val isValid: Boolean = true,
+    val errorMessage: String? = null
+) : Parcelable

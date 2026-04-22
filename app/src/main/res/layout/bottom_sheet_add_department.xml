@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/dash_surface">
+
+    <!-- Title -->
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Department"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/dash_text_primary" />
+
+    <!-- Parent Info -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textParentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Parent: IT Department"
+        android:textSize="14sp"
+        android:textColor="@color/dash_teal"
+        android:textStyle="bold" />
+
+    <!-- Department Name Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputNameLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:hint="Department Name *"
+        app:boxStrokeColor="@color/dash_border"
+        app:boxBackgroundColor="@color/dash_surface"
+        app:hintTextColor="@color/dash_text_muted">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:textColor="@color/dash_text_primary"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Department Code Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputCodeLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Department Code *"
+        app:boxStrokeColor="@color/dash_border"
+        app:boxBackgroundColor="@color/dash_surface"
+        app:hintTextColor="@color/dash_text_muted">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters"
+            android:textColor="@color/dash_text_primary"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Helper Text -->
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Code will be uppercase automatically"
+        android:textSize="12sp"
+        android:textColor="@color/dash_text_hint" />
+
+    <!-- Error Message -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/error"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:drawableStart="@drawable/ic_warning"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical" />
+
+    <!-- Loading Progress -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:indeterminate="true"
+        app:indicatorColor="@color/dash_teal"
+        android:visibility="gone" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textColor="@color/dash_text_muted"
+            android:textAllCaps="false" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Save Department"
+            android:textAllCaps="false"
+            app:backgroundTint="@color/dash_teal"
+            app:icon="@drawable/check_mark_circle_2_svgrepo_com"
+            app:iconGravity="textStart"
+            app:iconTint="@color/dash_bg"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+</LinearLayout>

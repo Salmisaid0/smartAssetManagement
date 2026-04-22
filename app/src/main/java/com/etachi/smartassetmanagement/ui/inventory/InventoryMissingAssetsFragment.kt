@@ -10,7 +10,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.etachi.smartassetmanagement.databinding.FragmentInventoryMissingAssetsBinding
 import com.etachi.smartassetmanagement.domain.usecase.inventory.GetMissingAssetsUseCase
 import com.etachi.smartassetmanagement.ui.inventory.adapter.MissingAssetAdapter
@@ -50,7 +49,7 @@ class InventoryMissingAssetsFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = MissingAssetAdapter()
         binding.rvMissingAssets.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
             adapter = this@InventoryMissingAssetsFragment.adapter
         }
     }
@@ -58,7 +57,6 @@ class InventoryMissingAssetsFragment : Fragment() {
     private fun loadMissingAssets() {
         val sessionId = args.sessionId
 
-        // ✅ FIX: Proper imports added, using modern repeatOnLifecycle
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 binding.progressBar.visibility = View.VISIBLE

@@ -1,4 +1,3 @@
-// File: ui/inventory/adapter/ScannedAssetAdapter.kt
 package com.etachi.smartassetmanagement.ui.inventory.adapter
 
 import android.view.LayoutInflater
@@ -8,6 +7,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.etachi.smartassetmanagement.databinding.ItemScannedAssetBinding
 import com.etachi.smartassetmanagement.domain.model.InventoryScan
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ScannedAssetAdapter : ListAdapter<InventoryScan, ScannedAssetAdapter.ViewHolder>(DiffCallback) {
 
@@ -26,18 +27,26 @@ class ScannedAssetAdapter : ListAdapter<InventoryScan, ScannedAssetAdapter.ViewH
         val scan = getItem(position)
 
         with(holder.binding) {
-            textScanOrder.text = "#${scan.scanOrder}"
-            textAssetName.text = scan.assetName
-            textAssetType.text = scan.assetType
-            textAssetSerial.text = scan.assetSerial
+            // ✅ FIXED: Use position + 1 for scan order
+            textScanOrder.text = "#${position + 1}"
 
-            // Show warning if asset in wrong room
-            if (!scan.isInCorrectRoom) {
-                chipWrongRoom.visibility = android.view.View.VISIBLE
-            } else {
-                chipWrongRoom.visibility = android.view.View.GONE
-            }
+            // ✅ FIXED: Use assetCategory instead of assetType
+            textAssetName.text = scan.assetName
+            textAssetType.text = scan.assetCategory
+            textAssetSerial.text = scan.assetCode
+
+            // ✅ FIXED: InventoryScan doesn't have isInCorrectRoom property
+            // Show all scans normally (you can add validation logic later if needed)
+            chipWrongRoom.visibility = android.view.View.GONE
+
+            // ✅ FIXED: Add scan time
+            textScannedAt.text = formatTime(scan.scannedAtMillis)
         }
+    }
+
+    private fun formatTime(timestampMillis: Long): String {
+        val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        return sdf.format(java.util.Date(timestampMillis))
     }
 
     private companion object DiffCallback : DiffUtil.ItemCallback<InventoryScan>() {

@@ -13,17 +13,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.etachi.smartassetmanagement.R
-import com.etachi.smartassetmanagement.data.model.Asset
 import com.etachi.smartassetmanagement.databinding.FragmentAddAssetBinding
 import com.etachi.smartassetmanagement.domain.model.Department
 import com.etachi.smartassetmanagement.domain.model.Direction
 import com.etachi.smartassetmanagement.domain.model.Room
 import com.etachi.smartassetmanagement.domain.repository.LocationRepository
-import com.etachi.smartassetmanagement.domain.model.Permission
 import com.etachi.smartassetmanagement.ui.list.AssetViewModel
-import com.etachi.smartassetmanagement.utils.UserSessionManager
-import com.etachi.smartassetmanagement.utils.showIfHasPermission
+import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,24 +34,25 @@ class AddAssetFragment : Fragment() {
     private val args: AddAssetFragmentArgs by navArgs()
 
     @Inject
-    lateinit var sessionManager: UserSessionManager
-
-    // ✅ ADDED: Location Repository for Cascading Dropdowns
-    @Inject
     lateinit var locationRepository: LocationRepository
 
-    private var existingAsset: Asset? = null
+    private var existingAsset: com.etachi.smartassetmanagement.data.model.Asset? = null
 
-    // ✅ ADDED: State variables for hierarchy selection
+    // Data lists
     private var directionList = listOf<Direction>()
     private var departmentList = listOf<Department>()
     private var roomList = listOf<Room>()
 
+    // Selected IDs
     private var selectedDirectionId = ""
     private var selectedDepartmentId = ""
     private var selectedRoomId = ""
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentAddAssetBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -65,7 +62,7 @@ class AddAssetFragment : Fragment() {
 
         setupToolbar()
         setupSpinner()
-        setupCascadingDropdowns() // ✅ ADDED
+        setupCascadingDropdowns()
         setupMode()
         setupSaveButton()
     }
@@ -78,59 +75,82 @@ class AddAssetFragment : Fragment() {
 
     private fun setupSpinner() {
         val statuses = arrayOf("Active", "Maintenance", "Retired")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statuses)
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            statuses
+        )
         binding.spinnerStatus.setAdapter(adapter)
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // ✅ NEW: CASCADING DROPDOWNS LOGIC
-    // ═══════════════════════════════════════════════════════════
-    private fun setupCascadingDropdowns() {
-        // 1. Observe Directions (Root Level)
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                locationRepository.getDirections().collect { directions ->
-                    directionList = directions
-                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, directions.map { it.name })
-                    binding.spinnerDirection.setAdapter(adapter)
-                }
-            }
-        }
+    // ═══════════════════════════════════════════════════════════════
+    // CASCADING DROPDOWNS
+    // ═══════════════════════════════════════════════════════════════
 
-        // 2. On Direction Selected -> Load Departments
+    private fun setupCascadingDropdowns() {
+        // 1. Load Directions
+        loadDirections()
+
+        // 2. Direction Selected → Load Departments
         binding.spinnerDirection.setOnItemClickListener { _, _, position, _ ->
-            val direction = directionList[position]
+            val direction = directionList.getOrNull(position) ?: return@setOnItemClickListener
             selectedDirectionId = direction.id
 
-            // Clear downstream selections
+            // Reset downstream
             binding.spinnerDepartment.setText("", false)
             binding.spinnerRoom.setText("", false)
             selectedDepartmentId = ""
             selectedRoomId = ""
+            departmentList = emptyList()
             roomList = emptyList()
 
+            // Enable department dropdown
+            binding.dropdownDepartmentLayout.isEnabled = true
+
+            // Load departments for this direction
             loadDepartments(direction.id)
         }
 
-        // 3. On Department Selected -> Load Rooms
+        // 3. Department Selected → Load Rooms
         binding.spinnerDepartment.setOnItemClickListener { _, _, position, _ ->
-            val dept = departmentList[position]
-            selectedDepartmentId = dept.id
-            selectedDirectionId = dept.directionId // Keep in sync in case user skipped direction click
+            val department = departmentList.getOrNull(position) ?: return@setOnItemClickListener
+            selectedDepartmentId = department.id
 
-            // Clear downstream selection
+            // Reset downstream
             binding.spinnerRoom.setText("", false)
             selectedRoomId = ""
+            roomList = emptyList()
 
-            loadRooms(dept.id)
+            // Enable room dropdown
+            binding.dropdownRoomLayout.isEnabled = true
+
+            // Load rooms for this department
+            loadRooms(department.id)
         }
 
-        // 4. On Room Selected
+        // 4. Room Selected
         binding.spinnerRoom.setOnItemClickListener { _, _, position, _ ->
-            val room = roomList[position]
+            val room = roomList.getOrNull(position) ?: return@setOnItemClickListener
             selectedRoomId = room.id
-            selectedDepartmentId = room.departmentId // Keep in sync
-            selectedDirectionId = room.directionId   // Keep in sync
+            selectedDepartmentId = room.departmentId
+            selectedDirectionId = room.directionId
+        }
+    }
+
+    private fun loadDirections() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                locationRepository.getDirections().collect { directions ->
+                    directionList = directions
+                    val names = directions.map { it.name }
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_dropdown_item_1line,
+                        names
+                    )
+                    binding.spinnerDirection.setAdapter(adapter)
+                }
+            }
         }
     }
 
@@ -139,7 +159,12 @@ class AddAssetFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 locationRepository.getDepartments(directionId).collect { departments ->
                     departmentList = departments
-                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, departments.map { it.name })
+                    val names = departments.map { it.name }
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_dropdown_item_1line,
+                        names
+                    )
                     binding.spinnerDepartment.setAdapter(adapter)
                 }
             }
@@ -151,21 +176,27 @@ class AddAssetFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 locationRepository.getRooms(departmentId).collect { rooms ->
                     roomList = rooms
-                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, rooms.map { it.name })
+                    val names = rooms.map { it.name }
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_dropdown_item_1line,
+                        names
+                    )
                     binding.spinnerRoom.setAdapter(adapter)
                 }
             }
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // ✅ UPDATED: MODE SETUP (ADDS EDIT MODE LOCATION PREFILL)
-    // ═══════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════
+    // MODE SETUP (Add or Edit)
+    // ═══════════════════════════════════════════════════════════════
+
     private fun setupMode() {
         existingAsset = args.assetObj
 
         if (existingAsset != null) {
-            // --- EDIT MODE ---
+            // EDIT MODE
             binding.toolbar.title = "Edit Asset"
             binding.btnSaveAsset.text = "Update Asset"
 
@@ -175,53 +206,66 @@ class AddAssetFragment : Fragment() {
             binding.inputSerial.setText(existingAsset!!.serialNumber)
             binding.spinnerStatus.setText(existingAsset!!.status, false)
 
-            // ✅ ADDED: Pre-fill Location Dropdowns in Edit Mode
+            // Pre-fill location
             selectedDirectionId = existingAsset!!.directionId
             selectedDepartmentId = existingAsset!!.departmentId
             selectedRoomId = existingAsset!!.roomId
+
             preselectLocationDropdowns()
 
         } else {
-            // --- ADD MODE ---
-            binding.toolbar.title = "New Asset"
+            // ADD MODE
+            binding.toolbar.title = "Add Asset"
             binding.btnSaveAsset.text = "Save Asset"
         }
     }
 
-    // ✅ ADDED: Helper to fetch and set text for dropdowns in Edit Mode
     private fun preselectLocationDropdowns() {
-        val asset = existingAsset ?: return
-
         viewLifecycleOwner.lifecycleScope.launch {
-            // 1. Fetch and set Direction
-            val dir = locationRepository.getDirection(asset.directionId)
+            // Load and select Direction
+            val dir = locationRepository.getDirection(selectedDirectionId)
             if (dir != null) {
-                binding.spinnerDirection.setText(dir.name, false)
-                loadDepartments(dir.id) // Populate department list
+                val directionIndex = directionList.indexOfFirst { it.id == selectedDirectionId }
+                if (directionIndex >= 0) {
+                    binding.spinnerDirection.setText(dir.name, false)
+                }
 
-                // 2. Fetch and set Department
-                val dept = locationRepository.getDepartment(dir.id, asset.departmentId)
+                // Load departments for this direction
+                loadDepartments(selectedDirectionId)
+
+                // Wait for departments to load, then select
+                kotlinx.coroutines.delay(500)
+
+                val dept = locationRepository.getDepartment(selectedDirectionId, selectedDepartmentId)
                 if (dept != null) {
-                    binding.spinnerDepartment.setText(dept.name, false)
-                    loadRooms(dept.id) // Populate room list
+                    val deptIndex = departmentList.indexOfFirst { it.id == selectedDepartmentId }
+                    if (deptIndex >= 0) {
+                        binding.spinnerDepartment.setText(dept.name, false)
+                    }
 
-                    // 3. Fetch and set Room
-                    val room = locationRepository.getRoom(asset.roomId)
+                    // Load rooms for this department
+                    loadRooms(selectedDepartmentId)
+
+                    // Wait for rooms to load, then select
+                    kotlinx.coroutines.delay(500)
+
+                    val room = locationRepository.getRoom(selectedRoomId)
                     if (room != null) {
-                        binding.spinnerRoom.setText(room.name, false)
+                        val roomIndex = roomList.indexOfFirst { it.id == selectedRoomId }
+                        if (roomIndex >= 0) {
+                            binding.spinnerRoom.setText(room.name, false)
+                        }
                     }
                 }
             }
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // ✅ UPDATED: SAVE LOGIC (USES HIERARCHY IDs)
-    // ═══════════════════════════════════════════════════════════
-    private fun setupSaveButton() {
-        val permission = if (existingAsset != null) Permission.ASSET_EDIT else Permission.ASSET_CREATE
-        binding.btnSaveAsset.showIfHasPermission(sessionManager, permission)
+    // ═══════════════════════════════════════════════════════════════
+    // SAVE BUTTON
+    // ═══════════════════════════════════════════════════════════════
 
+    private fun setupSaveButton() {
         binding.btnSaveAsset.setOnClickListener {
             val name = binding.inputName.text.toString().trim()
             val type = binding.inputType.text.toString().trim()
@@ -229,18 +273,19 @@ class AddAssetFragment : Fragment() {
             val owner = binding.inputOwner.text.toString().trim()
             val serial = binding.inputSerial.text.toString().trim()
 
+            // Validate required fields
             if (name.isEmpty() || type.isEmpty()) {
                 Toast.makeText(requireContext(), "Please fill Name and Type", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // ✅ ADDED: Validate Location Hierarchy
+            // Validate location
             if (selectedDirectionId.isEmpty() || selectedDepartmentId.isEmpty() || selectedRoomId.isEmpty()) {
-                Toast.makeText(requireContext(), "Please select a full location (Direction, Dept, Room)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please select Location (Direction, Department, Room)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // ✅ ADDED: Get the fullPath for the selected room
+            // Get selected room for path
             val selectedRoom = roomList.find { it.id == selectedRoomId }
             val roomPathString = selectedRoom?.fullPath ?: ""
 
@@ -250,30 +295,32 @@ class AddAssetFragment : Fragment() {
                     name = name,
                     type = type,
                     status = status,
-                    location = roomPathString,     // ✅ Updated from plain text to path
+                    location = roomPathString,
                     owner = owner,
                     serialNumber = serial,
-                    directionId = selectedDirectionId,   // ✅ Linked to Organigramme
-                    departmentId = selectedDepartmentId, // ✅ Linked to Organigramme
-                    roomId = selectedRoomId,             // ✅ Linked to Organigramme
-                    roomPath = roomPathString            // ✅ Linked to Organigramme
+                    directionId = selectedDirectionId,
+                    departmentId = selectedDepartmentId,
+                    roomId = selectedRoomId,
+                    roomPath = roomPathString
                 )
                 viewModel.updateAsset(updatedAsset)
                 Toast.makeText(requireContext(), "Asset Updated!", Toast.LENGTH_SHORT).show()
             } else {
                 // CREATE
-                val newAsset = Asset(
+                val newAsset = com.etachi.smartassetmanagement.data.model.Asset(
                     id = "",
                     name = name,
                     type = type,
                     status = status,
-                    location = roomPathString,     // ✅ Updated from plain text to path
+                    location = roomPathString,
                     owner = owner,
                     serialNumber = serial,
-                    directionId = selectedDirectionId,   // ✅ Linked to Organigramme
-                    departmentId = selectedDepartmentId, // ✅ Linked to Organigramme
-                    roomId = selectedRoomId,             // ✅ Linked to Organigramme
-                    roomPath = roomPathString            // ✅ Linked to Organigramme
+                    iotId = null,
+                    qrCode = null,
+                    directionId = selectedDirectionId,
+                    departmentId = selectedDepartmentId,
+                    roomId = selectedRoomId,
+                    roomPath = roomPathString
                 )
                 viewModel.insertAsset(newAsset)
                 Toast.makeText(requireContext(), "Asset Saved!", Toast.LENGTH_SHORT).show()

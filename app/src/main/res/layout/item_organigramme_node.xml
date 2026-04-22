@@ -1,92 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rootRowContainer"
+    android:id="@+id/cardRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:gravity="center_vertical"
-    android:minHeight="56dp"
-    android:orientation="horizontal"
-    android:paddingVertical="4dp">
+    android:layout_marginVertical="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/dash_surface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/dash_border"
+    app:strokeWidth="1dp"
+    app:rippleColor="@color/dash_teal_surface">
 
-    <!-- Indent Space (Width set programmatically) -->
-    <View
-        android:id="@+id/indentSpace"
-        android:layout_width="0dp"
-        android:layout_height="match_parent" />
-
-    <!-- Expand/Collapse Arrow -->
-    <ImageView
-        android:id="@+id/iconExpand"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:contentDescription="Expand"
-        android:src="@drawable/ic_chevron_right"
-        app:tint="@color/dash_text_muted" />
-
-    <!-- Type Icon -->
-    <ImageView
-        android:id="@+id/iconType"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:contentDescription="Type"
-        app:tint="@color/dash_teal"
-        tools:src="@drawable/business_svgrepo_com" />
-
-    <!-- Text Content -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="12dp"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textNodeName"
+        <!-- Indent Space -->
+        <View
+            android:id="@+id/indentSpace"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:visibility="invisible" />
+
+        <!-- Expand/Collapse Arrow with Animation -->
+        <ImageView
+            android:id="@+id/iconExpand"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="2dp"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="Expand"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Type Icon with Background -->
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_icon_circle_teal" />
+
+            <ImageView
+                android:id="@+id/iconType"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:contentDescription="Type icon"
+                tools:src="@drawable/business_svgrepo_com"
+                app:tint="@color/dash_teal" />
+        </FrameLayout>
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textNodeName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="@color/dash_text_primary"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="IT Department" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textNodeCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textColor="@color/dash_text_muted"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.1"
+                tools:text="IT-DEPT" />
+        </LinearLayout>
+
+        <!-- Child Count Badge -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/textChildCount"
+            style="@style/Widget.Material3.Chip.Suggestion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="@color/dash_text_primary"
-            tools:text="Direction Générale" />
+            android:layout_marginEnd="8dp"
+            android:text="3 depts"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:visibility="gone"
+            app:chipBackgroundColor="@color/dash_teal_surface"
+            app:chipStrokeColor="@color/dash_teal"
+            app:chipStrokeWidth="1dp"
+            tools:visibility="visible" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textNodeCode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="@color/dash_text_hint"
-            tools:text="DIR-GEN" />
+        <!-- Add Child Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddChild"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            app:icon="@drawable/add_square_svgrepo_com"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconTint="@color/dash_teal"
+            app:backgroundTint="@color/dash_teal_surface"
+            android:contentDescription="Add child"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </LinearLayout>
-
-    <!-- Child Count Badge -->
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/textChildCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:background="@color/dash_teal_surface"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="2dp"
-        android:textAppearance="?attr/textAppearanceLabelSmall"
-        android:textColor="@color/dash_teal"
-        android:visibility="gone"
-        tools:text="3 depts"
-        tools:visibility="visible" />
-
-    <!-- Add Child Button -->
-    <ImageButton
-        android:id="@+id/btnAddChild"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="8dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Add"
-        android:src="@android:drawable/ic_input_add"
-        app:tint="@color/dash_text_muted" />
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

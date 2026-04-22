@@ -25,7 +25,6 @@ class InventoryRoomScanFragment : Fragment() {
     private var _binding: FragmentInventoryRoomScanBinding? = null
     private val binding get() = _binding!!
 
-    // ✅ FIX 1: Use activityViewModels to share state with InventoryAssetScanFragment
     private val viewModel: InventoryViewModel by activityViewModels()
 
     private var hasNavigatedToScan = false
@@ -41,15 +40,11 @@ class InventoryRoomScanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Reset flag on fresh view creation
         hasNavigatedToScan = false
-
-        // ✅ FIX 2: Removed broken button click listener. The scanner starts automatically.
         setupScanner()
         setupObservers()
     }
 
-    // ✅ FIX 3: Scans directly using the barcodeView already in your XML
     private fun setupScanner() {
         barcodeView = binding.barcodeView
 
@@ -82,7 +77,7 @@ class InventoryRoomScanFragment : Fragment() {
             state.error?.let { errorMessage ->
                 Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_LONG).show()
                 viewModel.clearError()
-                barcodeView?.resume() // Resume scanning after error
+                barcodeView?.resume()
             }
 
             state.session?.let { session ->
@@ -93,10 +88,7 @@ class InventoryRoomScanFragment : Fragment() {
                         putString("sessionId", session.id)
                     }
 
-                    // Make sure R.id.inventoryAssetScanFragment is in your nav_graph.xml
                     findNavController().navigate(R.id.inventoryAssetScanFragment, bundle)
-
-                    // Clear ViewModel state immediately so back-press doesn't trigger loop
                     viewModel.clearSessionState()
                 }
             }

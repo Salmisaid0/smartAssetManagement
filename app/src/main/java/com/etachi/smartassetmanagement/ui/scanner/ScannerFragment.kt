@@ -1,7 +1,6 @@
 package com.etachi.smartassetmanagement.ui.scanner
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -34,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
+import io.grpc.Context
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -44,6 +44,7 @@ class ScannerFragment : Fragment() {
     private var _binding: FragmentScannerBinding? = null
     private val binding get() = _binding!!
 
+    // ✅ Use activityViewModels to share with AssetsFragment
     private val viewModel: AssetViewModel by activityViewModels()
     private lateinit var historyAdapter: ScanHistoryAdapter
 
@@ -94,17 +95,20 @@ class ScannerFragment : Fragment() {
             viewModel.scanHistory.collectLatest { historyList ->
                 historyAdapter.submitList(historyList)
 
-                // Toggle empty state and RecyclerView
-                binding.emptyStateView.visibility =
-                    if (historyList.isEmpty()) View.VISIBLE else View.GONE
-                binding.rvScanHistory.visibility =
-                    if (historyList.isEmpty()) View.GONE else View.VISIBLE
+                // ✅ FIXED: Use list.isEmpty() not .isEmpty() ambiguity
+                if (historyList.isEmpty()) {
+                    binding.emptyStateView.visibility = View.VISIBLE
+                    binding.rvScanHistory.visibility = View.GONE
+                } else {
+                    binding.emptyStateView.visibility = View.GONE
+                    binding.rvScanHistory.visibility = View.VISIBLE
+                }
             }
         }
     }
 
     private fun setupModeSelector() {
-        // --- SECURITY ENFORCEMENT ---
+        // Security enforcement
         binding.chipMaintenance.enableIfHasPermission(sessionManager, Permission.SCAN_MAINTENANCE)
         binding.chipAudit.enableIfHasPermission(sessionManager, Permission.SCAN_AUDIT)
         binding.chipCheckIn.enableIfHasPermission(sessionManager, Permission.SCAN_CHECK_IN)
@@ -141,11 +145,9 @@ class ScannerFragment : Fragment() {
             ) == PackageManager.PERMISSION_GRANTED -> {
                 startScanner()
             }
-
             shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
                 showPermissionRationaleDialog()
             }
-
             else -> {
                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
@@ -230,10 +232,11 @@ class ScannerFragment : Fragment() {
     }
 
     private fun performHapticFeedback() {
-        val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val vibrator = requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
+            @Suppress("DEPRECATION")
             vibrator.vibrate(100)
         }
     }

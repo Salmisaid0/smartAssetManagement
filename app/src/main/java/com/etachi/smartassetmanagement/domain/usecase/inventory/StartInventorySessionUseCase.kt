@@ -1,4 +1,3 @@
-// File: domain/usecase/inventory/StartInventorySessionUseCase.kt
 package com.etachi.smartassetmanagement.domain.usecase.inventory
 
 import com.etachi.smartassetmanagement.domain.model.InventorySession
@@ -54,7 +53,7 @@ class StartInventorySessionUseCase @Inject constructor(
         // 5. Get expected asset count
         val expectedAssets = inventoryRepository.getRoomExpectedAssets(room.id)
 
-        // 6. Start session with all required data
+        // 6. Start session
         return inventoryRepository.startSession(
             roomId = room.id,
             roomName = room.name,

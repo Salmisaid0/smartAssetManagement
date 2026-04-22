@@ -3,19 +3,16 @@ package com.etachi.smartassetmanagement.domain.usecase.inventory
 import com.etachi.smartassetmanagement.domain.model.InventorySession
 import com.etachi.smartassetmanagement.domain.model.Permission
 import com.etachi.smartassetmanagement.domain.model.Resource
+import com.etachi.smartassetmanagement.domain.model.SessionStatus
 import com.etachi.smartassetmanagement.domain.repository.InventoryRepository
 import com.etachi.smartassetmanagement.utils.UserSessionManager
 import javax.inject.Inject
 
-/**
- * Use case for completing an inventory session.
- */
 class CompleteInventorySessionUseCase @Inject constructor(
     private val inventoryRepository: InventoryRepository,
     private val sessionManager: UserSessionManager
 ) {
 
-    // ✅ FIX: Changed Result to Resource
     suspend operator fun invoke(sessionId: String, notes: String = ""): Resource<InventorySession> {
         // 1. Permission check
         if (!sessionManager.hasPermission(Permission.SCAN_AUDIT)) {
@@ -42,7 +39,7 @@ class CompleteInventorySessionUseCase @Inject constructor(
         }
 
         // 5. Verify status
-        if (session.status != com.etachi.smartassetmanagement.domain.model.SessionStatus.IN_PROGRESS) {
+        if (session.status != SessionStatus.IN_PROGRESS && session.status != SessionStatus.PAUSED) {
             return Resource.Error(
                 IllegalStateException("Invalid session status"),
                 "Session is not in progress"

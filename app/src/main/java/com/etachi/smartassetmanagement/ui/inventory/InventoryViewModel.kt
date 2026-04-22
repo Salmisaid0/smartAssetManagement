@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.etachi.smartassetmanagement.domain.model.InventoryScan
 import com.etachi.smartassetmanagement.domain.model.InventorySession
 import com.etachi.smartassetmanagement.domain.model.MissingAsset
-import com.etachi.smartassetmanagement.domain.model.Resource
 import com.etachi.smartassetmanagement.domain.repository.InventoryRepository
 import com.etachi.smartassetmanagement.domain.repository.LocationRepository
 import com.etachi.smartassetmanagement.domain.usecase.inventory.ScanAssetUseCase
@@ -19,14 +18,11 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-// ✅ Updated State to include Asset Scanning properties
 data class InventoryUiState(
     val isLoading: Boolean = false,
     val session: InventorySession? = null,
     val roomName: String? = null,
     val error: String? = null,
-
-    // Properties required by InventoryAssetScanFragment
     val scannedAssets: List<InventoryScan> = emptyList(),
     val lastScanResult: ScanAssetUseCase.ScanResult? = null,
     val showMissingDialog: Boolean = false,
@@ -44,12 +40,11 @@ class InventoryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(InventoryUiState())
     val uiState: StateFlow<InventoryUiState> = _uiState.asStateFlow()
 
-    // Keep track of the current session ID for asset scanning
     private var currentSessionId: String = ""
 
-    // ==========================================
-    // ROOM SCANNING LOGIC (Existing)
-    // ==========================================
+    // ═══════════════════════════════════════════════════════════════
+    // ROOM SCANNING
+    // ═══════════════════════════════════════════════════════════════
 
     fun validateAndStartSession(qrCode: String) {
         if (!qrCode.startsWith("ROOM-")) {
@@ -88,7 +83,7 @@ class InventoryViewModel @Inject constructor(
                 )
 
                 when (result) {
-                    is Resource.Success -> {
+                    is com.etachi.smartassetmanagement.domain.model.Resource.Success -> {
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -97,7 +92,7 @@ class InventoryViewModel @Inject constructor(
                             )
                         }
                     }
-                    is Resource.Error -> {
+                    is com.etachi.smartassetmanagement.domain.model.Resource.Error -> {
                         _uiState.update { it.copy(isLoading = false, error = result.message) }
                     }
                     else -> {}
@@ -114,25 +109,25 @@ class InventoryViewModel @Inject constructor(
         _uiState.update { it.copy(session = null) }
     }
 
-    // ==========================================
-    // ASSET SCANNING LOGIC (Newly Added)
-    // ==========================================
+    // ═══════════════════════════════════════════════════════════════
+    // ASSET SCANNING
+    // ═══════════════════════════════════════════════════════════════
 
     fun loadExistingSession(sessionId: String) {
         currentSessionId = sessionId
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                // Observe session for live progress updates
                 inventoryRepository.observeSession(sessionId).collect { session ->
                     _uiState.update { it.copy(isLoading = false, session = session) }
                 }
             } catch (e: Exception) {
+                Timber.e(e, "Failed to observe session")
                 _uiState.update { it.copy(isLoading = false, error = "Failed to load session") }
             }
         }
 
-        // Observe scanned assets list
         viewModelScope.launch {
             inventoryRepository.getSessionScans(sessionId).collect { scans ->
                 _uiState.update { it.copy(scannedAssets = scans) }
@@ -143,13 +138,12 @@ class InventoryViewModel @Inject constructor(
     fun processAssetScan(barcode: String) {
         viewModelScope.launch {
             try {
-                // ⚠️ NOTE: If your ScanAssetUseCase uses a different method name
-                // (like "scan" instead of "execute"), change it below.
-                // Also, if it only takes "barcode", remove "currentSessionId".
-                val result = scanAssetUseCase.execute(currentSessionId, barcode)
-
+                Timber.d(" Scanning asset: $barcode")
+                val result = scanAssetUseCase(currentSessionId, barcode)
+                Timber.d("📷 Scan result: $result")
                 _uiState.update { it.copy(lastScanResult = result) }
             } catch (e: Exception) {
+                Timber.e(e, "Scan failed")
                 _uiState.update { it.copy(error = e.message) }
             }
         }
@@ -160,16 +154,16 @@ class InventoryViewModel @Inject constructor(
             try {
                 val result = inventoryRepository.completeSession(currentSessionId, "")
 
-                if (result is Resource.Success) {
-                    // Fetch missing assets to show in the dialog
-                    val missing = inventoryRepository.getMissingAssets(currentSessionId)
+                if (result is com.etachi.smartassetmanagement.domain.model.Resource.Success) {
+                    val missing = inventoryRepository.computeMissingAssets(currentSessionId)
                     _uiState.update {
                         it.copy(showMissingDialog = true, missingAssets = missing)
                     }
-                } else if (result is Resource.Error) {
+                } else if (result is com.etachi.smartassetmanagement.domain.model.Resource.Error) {
                     _uiState.update { it.copy(error = result.message) }
                 }
             } catch (e: Exception) {
+                Timber.e(e, "Failed to complete session")
                 _uiState.update { it.copy(error = "Failed to complete session") }
             }
         }
@@ -180,7 +174,7 @@ class InventoryViewModel @Inject constructor(
             try {
                 inventoryRepository.cancelSession(currentSessionId)
             } catch (e: Exception) {
-                // Ignore errors on cancel
+                Timber.e(e, "Failed to cancel session")
             }
         }
     }

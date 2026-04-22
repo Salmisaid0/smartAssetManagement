@@ -39,6 +39,20 @@ class AssetRepository @Inject constructor(
             }
         awaitClose { listener.remove() }
     }
+    suspend fun getAssetById(assetId: String): com.etachi.smartassetmanagement.data.model.Asset? {
+        return try {
+            val snapshot = assetsCollection.document(assetId).get().await()
+            if (snapshot.exists()) {
+                snapshot.toObject(com.etachi.smartassetmanagement.data.model.Asset::class.java)
+                    ?.copy(id = snapshot.id)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching asset by ID: $assetId")
+            null
+        }
+    }
 
     suspend fun getAssetByQrCode(qrCode: String): Asset? {
         return try {

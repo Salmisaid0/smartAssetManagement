@@ -9,11 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.etachi.smartassetmanagement.R
 import com.etachi.smartassetmanagement.databinding.FragmentDashboardBinding
 import com.etachi.smartassetmanagement.ui.list.AssetViewModel
-import com.etachi.smartassetmanagement.ui.scanner.ScanHistoryAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -28,6 +26,7 @@ class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
 
+    // ✅ Use activityViewModels to share with AssetsFragment
     private val viewModel: AssetViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -49,14 +48,14 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupHeader() {
-        // Formatage de la date
+        // Format date
         val dateFormat = SimpleDateFormat("EEEE, dd MMMM", Locale.getDefault())
         binding.textGreetingDate.text = dateFormat.format(Date()).uppercase()
 
-        // Texte d'accueil par défaut (Modifie-le avec sessionManager plus tard si tu veux)
+        // Welcome text
         binding.textWelcomeEmail.text = "Welcome, User"
 
-        // Rôle par défaut
+        // Role chip
         binding.chipUserRole.text = "Administrator"
     }
 
@@ -67,7 +66,7 @@ class DashboardFragment : Fragment() {
                 binding.textActive.text = stats.active.toString()
                 binding.textMaintenance.text = stats.maintenance.toString()
 
-                // Barres de progression dynamiques (Méthode 100% sûre)
+                // Update progress bars
                 updateProgressBar(binding.barActiveFill, stats.active, stats.total)
                 updateProgressBar(binding.barMaintenanceFill, stats.maintenance, stats.total)
             }
@@ -75,24 +74,22 @@ class DashboardFragment : Fragment() {
     }
 
     private fun updateProgressBar(bar: View, currentValue: Int, totalValue: Int) {
-        val parent = bar.parent as? FrameLayout ?: return  // safe cast, exit if null
+        val parent = bar.parent as? FrameLayout ?: return
 
-        parent.post {  // post on PARENT — it's already measured at this point
+        parent.post {
             val safeTotal = totalValue.coerceAtLeast(1)
             val percentage = currentValue.toFloat() / safeTotal
             val params = bar.layoutParams as FrameLayout.LayoutParams
-            params.width = (percentage * parent.width).toInt()  // parent.width is now > 0
+            params.width = (percentage * parent.width).toInt()
             bar.layoutParams = params
         }
     }
 
     private fun setupActions() {
-        // SAFE METHOD: Doesn't need to know the ID of the BottomNavigationView
         binding.actionScan.setOnClickListener {
             try {
                 findNavController().navigate(R.id.navigation_scanner)
             } catch (e: Exception) {
-                // Fallback if navigation ID is different in your graph
                 val bottomNav = requireActivity().findViewById<View>(R.id.bottom_nav)
                 bottomNav?.performClick()
             }
@@ -108,18 +105,26 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    // ✅ ADDED BACK: Scan history list
     private fun setupHistoryList() {
-        val historyAdapter = ScanHistoryAdapter()
+        val historyAdapter = com.etachi.smartassetmanagement.ui.scanner.ScanHistoryAdapter()
         binding.rvDashboardHistory.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
             adapter = historyAdapter
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.scanHistory.collectLatest { list ->
                 historyAdapter.submitList(list)
-                binding.layoutEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
-                binding.rvDashboardHistory.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
+
+                // ✅ FIXED: Use list.isEmpty() not .isEmpty() ambiguity
+                if (list.isEmpty()) {
+                    binding.layoutEmptyState.visibility = View.VISIBLE
+                    binding.rvDashboardHistory.visibility = View.GONE
+                } else {
+                    binding.layoutEmptyState.visibility = View.GONE
+                    binding.rvDashboardHistory.visibility = View.VISIBLE
+                }
             }
         }
     }

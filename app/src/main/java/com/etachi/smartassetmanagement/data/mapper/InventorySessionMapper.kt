@@ -1,4 +1,3 @@
-// File: data/mapper/InventorySessionMapper.kt
 package com.etachi.smartassetmanagement.data.mapper
 
 import com.etachi.smartassetmanagement.domain.model.InventorySession
@@ -25,12 +24,32 @@ object InventorySessionMapper {
                 missingAssetCount = snapshot.getLong("missingAssetCount")?.toInt() ?: 0,
                 startTimeMillis = snapshot.getLong("startTimeMillis"),
                 endTimeMillis = snapshot.getLong("endTimeMillis"),
+                lastUpdatedMillis = snapshot.getLong("lastUpdatedMillis"),
                 createdAtMillis = snapshot.getLong("createdAtMillis"),
-                updatedAtMillis = snapshot.getLong("updatedAtMillis"),
                 notes = snapshot.getString("notes") ?: ""
             )
         } catch (e: Exception) {
             null
         }
     }
+
+    fun toFirestoreMap(session: InventorySession): Map<String, Any?> = mapOf(
+        "auditorId" to session.auditorId,
+        "auditorEmail" to session.auditorEmail,
+        "auditorName" to session.auditorName,
+        "roomId" to session.roomId,
+        "roomName" to session.roomName,
+        "roomPath" to session.roomPath,
+        "departmentId" to session.departmentId,
+        "directionId" to session.directionId,
+        "status" to session.status.key,
+        "expectedAssetCount" to session.expectedAssetCount,
+        "scannedAssetCount" to session.scannedAssetCount,
+        "missingAssetCount" to session.missingAssetCount,
+        "startTimeMillis" to (session.startTimeMillis ?: System.currentTimeMillis()),
+        "endTimeMillis" to session.endTimeMillis,
+        "lastUpdatedMillis" to System.currentTimeMillis(),
+        "createdAtMillis" to (session.createdAtMillis ?: System.currentTimeMillis()),
+        "notes" to session.notes
+    )
 }

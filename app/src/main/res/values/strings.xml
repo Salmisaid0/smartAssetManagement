@@ -4,5 +4,41 @@
     <string name="directions_count">%1$d Directions</string>
     <string name="departments_count">%1$d Depts</string>
     <string name="rooms_count">%1$d Rooms</string>
+    <!-- Inventory -->
+    <string name="inventory_history">Inventory History</string>
+    <string name="inventory_session_details">Session Details</string>
+    <string name="inventory_scan_assets">Scan Assets</string>
+    <string name="inventory_missing_assets">Missing Assets</string>
+    <string name="inventory_start_session">Start Session</string>
+    <string name="inventory_complete_session">Complete Session</string>
+    <string name="inventory_pause_session">Pause Session</string>
+    <string name="inventory_resume_session">Resume Session</string>
+    <string name="inventory_cancel_session">Cancel Session</string>
+    <string name="inventory_no_sessions">No Inventory Sessions</string>
+    <string name="inventory_no_scans">No Scanned Assets</string>
+    <string name="inventory_expected_assets">Expected Assets</string>
+    <string name="inventory_scanned_assets">Scanned Assets</string>
+    <string name="inventory_missing_assets_count">Missing Assets</string>
+    <string name="inventory_progress">Progress</string>
+    <string name="inventory_duration">Duration</string>
+    <string name="inventory_auditor">Auditor</string>
+    <string name="inventory_room">Room</string>
+    <string name="inventory_status">Status</string>
+    <string name="inventory_date">Date</string>
+    <string name="inventory_filter_all">All</string>
+    <string name="inventory_filter_in_progress">In Progress</string>
+    <string name="inventory_filter_completed">Completed</string>
+    <string name="inventory_filter_cancelled">Cancelled</string>
+    <string name="inventory_retry">Retry</string>
+    <string name="inventory_session_completed">Session completed successfully</string>
+    <string name="inventory_session_cancelled">Session cancelled</string>
+    <string name="inventory_session_paused">Session paused</string>
+    <string name="inventory_session_resumed">Session resumed</string>
+    <string name="inventory_confirm_complete">Are you sure you want to complete this session?</string>
+    <string name="inventory_confirm_cancel">Are you sure you want to cancel this session?</string>
+    <string name="inventory_error_load_sessions">Failed to load inventory sessions</string>
+    <string name="inventory_error_load_session">Failed to load session details</string>
+    <string name="inventory_error_network">Network error. Please check your connection.</string>
+
 </resources>
 

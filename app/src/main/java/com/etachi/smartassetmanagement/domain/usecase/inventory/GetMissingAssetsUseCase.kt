@@ -1,19 +1,9 @@
-// File: domain/usecase/inventory/GetMissingAssetsUseCase.kt
 package com.etachi.smartassetmanagement.domain.usecase.inventory
 
 import com.etachi.smartassetmanagement.domain.model.MissingAsset
 import com.etachi.smartassetmanagement.domain.repository.InventoryRepository
 import javax.inject.Inject
 
-/**
- * Use case for computing missing assets after inventory completion.
- *
- * Algorithm:
- * 1. Fetch expected assets (server-side: where("roomId"))
- * 2. Fetch scanned asset IDs (server-side: where("sessionId"))
- * 3. Compute set difference on client (IDs only - minimal memory)
- * 4. Map missing IDs to full asset data
- */
 class GetMissingAssetsUseCase @Inject constructor(
     private val inventoryRepository: InventoryRepository
 ) {
@@ -31,8 +21,8 @@ class GetMissingAssetsUseCase @Inject constructor(
         val session = inventoryRepository.getSession(sessionId)
             ?: throw IllegalArgumentException("Session not found: $sessionId")
 
-        // 2. Get missing assets (repository handles the logic efficiently)
-        val missingAssets = inventoryRepository.getMissingAssets(sessionId)
+        // 2. Get missing assets (✅ FIXED: Use computeMissingAssets)
+        val missingAssets = inventoryRepository.computeMissingAssets(sessionId)
 
         // 3. Compute report
         val foundCount = session.scannedAssetCount
