@@ -121,10 +121,8 @@ class AddAssetFragment : Fragment() {
             selectedRoomId = ""
             roomList = emptyList()
 
-            // Enable room dropdown
             binding.dropdownRoomLayout.isEnabled = true
 
-            // Load rooms for this department
             loadRooms(department.id)
         }
 

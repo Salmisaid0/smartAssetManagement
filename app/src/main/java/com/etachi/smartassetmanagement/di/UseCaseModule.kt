@@ -1,12 +1,17 @@
 package com.etachi.smartassetmanagement.di
 
 import com.etachi.smartassetmanagement.data.repository.AssetRepository
+import com.etachi.smartassetmanagement.data.repository.RelocationRepository
+import com.etachi.smartassetmanagement.data.repository.ScheduledInventoryRepository
 import com.etachi.smartassetmanagement.domain.repository.InventoryRepository
 import com.etachi.smartassetmanagement.domain.repository.LocationRepository
 import com.etachi.smartassetmanagement.domain.usecase.GetInventorySessionsUseCase
 import com.etachi.smartassetmanagement.domain.usecase.GetSessionByIdUseCase
 import com.etachi.smartassetmanagement.domain.usecase.UpdateSessionStatusUseCase
 import com.etachi.smartassetmanagement.domain.usecase.inventory.CompleteInventorySessionUseCase
+import com.etachi.smartassetmanagement.domain.usecase.inventory.CreateRelocationRequestUseCase
+import com.etachi.smartassetmanagement.domain.usecase.inventory.CreateScheduledInventoryUseCase
+import com.etachi.smartassetmanagement.domain.usecase.inventory.GenerateInventoryReportUseCase
 import com.etachi.smartassetmanagement.domain.usecase.inventory.GetMissingAssetsUseCase
 import com.etachi.smartassetmanagement.domain.usecase.inventory.GetRoomAssetsUseCase
 import com.etachi.smartassetmanagement.domain.usecase.inventory.ScanAssetUseCase
@@ -100,5 +105,45 @@ object UseCaseModule {
         inventoryRepository: InventoryRepository
     ): GetRoomAssetsUseCase {
         return GetRoomAssetsUseCase(inventoryRepository)
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SPRINT 3: SCHEDULING USE CASES (✅ NEW)
+    // ═══════════════════════════════════════════════════════════════
+
+    @Provides
+    @Singleton
+    fun provideCreateScheduledInventoryUseCase(
+        repository: ScheduledInventoryRepository
+    ): CreateScheduledInventoryUseCase {
+        return CreateScheduledInventoryUseCase(repository)
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SPRINT 3: REPORT USE CASES (✅ NEW)
+    // ═══════════════════════════════════════════════════════════════
+
+    @Provides
+    @Singleton
+    fun provideGenerateInventoryReportUseCase(
+        inventoryRepository: InventoryRepository
+    ): GenerateInventoryReportUseCase {
+        return GenerateInventoryReportUseCase(inventoryRepository)
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SPRINT 3: RELOCATION USE CASES (✅ NEW)
+    // ═══════════════════════════════════════════════════════════════
+
+    @Provides
+    @Singleton
+    fun provideCreateRelocationRequestUseCase(
+        repository: RelocationRepository,
+        assetRepository: AssetRepository
+    ): CreateRelocationRequestUseCase {
+        return CreateRelocationRequestUseCase(
+            repository = repository,
+            assetRepository = assetRepository
+        )
     }
 }

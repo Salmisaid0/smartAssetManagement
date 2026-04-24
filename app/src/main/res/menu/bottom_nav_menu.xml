@@ -12,14 +12,13 @@
         android:title="Assets" />
 
     <item
-        android:id="@+id/navigation_organigram"
-        android:icon="@drawable/ic_organigrame"
-        android:title="Locations" />
+        android:id="@+id/navigation_scanner"
+        android:icon="@drawable/qr_code_svgrepo_com"
+        android:title="Scanner" />
 
     <item
-        android:id="@+id/navigation_inventory"
+        android:id="@+id/inventoryHomeFragment"
         android:icon="@drawable/ic_inventory"
-        android:iconTint="@color/dash_chip_bg_state"
         android:title="Inventory" />
 
     <item

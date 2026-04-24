@@ -86,23 +86,18 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupActions() {
+        // ✅ Scan Button
         binding.actionScan.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.navigation_scanner)
-            } catch (e: Exception) {
-                val bottomNav = requireActivity().findViewById<View>(R.id.bottom_nav)
-                bottomNav?.performClick()
-            }
+            findNavController().navigate(R.id.navigation_scanner)
         }
 
+        // ✅ Add Asset Button
         binding.actionAdd.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.navigation_assets)
-            } catch (e: Exception) {
-                val bottomNav = requireActivity().findViewById<View>(R.id.bottom_nav)
-                bottomNav?.performClick()
-            }
+            findNavController().navigate(R.id.navigation_assets)
         }
+
+        // ❌ REMOVED: cardLocations (doesn't exist in XML)
+        // Organigram is accessible from bottom nav now
     }
 
     // ✅ ADDED BACK: Scan history list

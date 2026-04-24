@@ -15,14 +15,41 @@
     <!-- Inventory Status Colors -->
     <color name="success">#2E7D32</color>
     <color name="success_container">#E8F5E9</color>
-    <color name="warning">#F57C00</color>
-    <color name="warning_container">#FFF3E0</color>
     <color name="error">#D32F2F</color>
     <color name="error_container">#FFEBEE</color>
     <color name="primary">#1976D2</color>
     <color name="primary_container">#E3F2FD</color>
     <color name="surface_variant">#F5F5F5</color>
     <color name="on_surface_variant">#757575</color>
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SPRINT 3: SCHEDULING COLORS -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <color name="scheduled">#1976D2</color>
+    <color name="scheduled_container">#E3F2FD</color>
+    <color name="scheduled_text">#0D47A1</color>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SPRINT 3: RELOCATION COLORS -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <color name="relocation">#F57C00</color>
+    <color name="relocation_container">#FFF3E0</color>
+    <color name="relocation_text">#E65100</color>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SPRINT 3: STATUS COLORS -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <color name="approved">#2E7D32</color>
+    <color name="approved_container">#E8F5E9</color>
+    <color name="approved_text">#1B5E20</color>
+
+    <color name="rejected">#D32F2F</color>
+    <color name="rejected_container">#FFEBEE</color>
+    <color name="rejected_text">#B71C1C</color>
+
+    <color name="warning">#F9A825</color>
+    <color name="warning_container">#FFFDE7</color>
+    <color name="warning_text">#F57F17</color>
+
 
 
 

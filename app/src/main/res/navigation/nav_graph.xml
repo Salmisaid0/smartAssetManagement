@@ -6,7 +6,7 @@
     app:startDestination="@id/navigation_dashboard">
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!-- BOTTOM NAVIGATION TABS (MAIN) -->
+    <!-- BOTTOM NAVIGATION (5 ITEMS MAX - NO CRASH) -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
 
     <fragment
@@ -15,35 +15,25 @@
         android:label="Dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
-    <!-- Assets Fragment -->
     <fragment
         android:id="@+id/navigation_assets"
         android:name="com.etachi.smartassetmanagement.ui.assets.AssetsFragment"
         android:label="Assets"
         tools:layout="@layout/fragment_assets">
-
         <argument
             android:name="roomId"
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
-
+        <!-- ✅ MATCHES YOUR CODE: actionAssetsFragmentToAssetDetailFragment -->
         <action
             android:id="@+id/action_assetsFragment_to_assetDetailFragment"
             app:destination="@id/assetDetailFragment" />
-        <action
-            android:id="@+id/action_organigrammeFragment_to_navigation_assets"
-            app:destination="@id/navigation_assets"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-
+        <!-- ✅ MATCHES YOUR CODE: actionAssetsFragmentToAddAssetFragment -->
         <action
             android:id="@+id/action_assetsFragment_to_addAssetFragment"
             app:destination="@id/addAssetFragment" />
     </fragment>
-
 
     <fragment
         android:id="@+id/navigation_scanner"
@@ -51,48 +41,25 @@
         android:label="Scanner"
         tools:layout="@layout/fragment_scanner" />
 
+    <!-- ✅ Inventory Home (Landing Page) - Bottom Nav Item -->
+    <fragment
+        android:id="@+id/inventoryHomeFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.home.InventoryHomeFragment"
+        android:label="Inventory"
+        tools:layout="@layout/fragment_inventory_home">
+        <action
+            android:id="@+id/action_inventoryHomeFragment_to_inventoryRoomScanFragment"
+            app:destination="@id/inventoryRoomScanFragment" />
+        <action
+            android:id="@+id/action_inventoryHomeFragment_to_inventoryHistoryFragment"
+            app:destination="@id/inventoryHistoryFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.etachi.smartassetmanagement.ui.profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
-
-    <fragment
-        android:id="@+id/navigation_organigram"
-        android:name="com.etachi.smartassetmanagement.ui.organigramme.OrganigrammeFragment"
-        android:label="Locations"
-        tools:layout="@layout/fragment_organigram">
-        <action
-            android:id="@+id/action_organigram_to_assets"
-            app:destination="@id/navigation_assets"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_inventory"
-        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryRoomScanFragment"
-        android:label="Inventory"
-        tools:layout="@layout/fragment_inventory_room_scan">
-        <action
-            android:id="@+id/action_inventory_to_assetScanning"
-            app:destination="@id/inventoryAssetScanFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/navigation_inventory"
-            app:popUpToInclusive="false" />
-        <action
-            android:id="@+id/action_inventory_to_missingAssets"
-            app:destination="@id/inventoryMissingAssetsFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- ASSET FLOW -->
@@ -121,54 +88,34 @@
     </fragment>
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!-- INVENTORY FLOW (FIXED - NO DUPLICATES) -->
+    <!-- INVENTORY FLOW (COMPLETE) -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!-- Inventory Home (NEW - Main Entry Point) -->
-    <fragment
-        android:id="@+id/navigation_inventory"
-        android:name="com.etachi.smartassetmanagement.ui.inventory.home.InventoryHomeFragment"
-        android:label="Inventory"
-        tools:layout="@layout/fragment_inventory_home">
 
-        <action
-            android:id="@+id/action_inventoryHome_to_roomScan"
-            app:destination="@id/inventoryRoomScanFragment" />
-
-        <action
-            android:id="@+id/action_inventoryHome_to_inventoryHistory"
-            app:destination="@id/inventoryHistoryFragment" />
-    </fragment>
-
-    <!-- Room Scan (Now a child screen) -->
+    <!-- 1. Room Scan (First step in inventory) -->
     <fragment
         android:id="@+id/inventoryRoomScanFragment"
         android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryRoomScanFragment"
         android:label="Scan Room"
-        tools:layout="@layout/fragment_inventory_room_scan" />
-
-    <!-- Inventory History -->
-    <fragment
-        android:id="@+id/inventoryHistoryFragment"
-        android:name="com.etachi.smartassetmanagement.ui.inventory.history.InventoryHistoryFragment"
-        android:label="Inventory History"
-        tools:layout="@layout/fragment_inventory_history">
+        tools:layout="@layout/fragment_inventory_room_scan">
         <action
-            android:id="@+id/action_inventoryHistoryFragment_to_inventorySessionDetailsFragment"
-            app:destination="@id/inventorySessionDetailsFragment" />
+            android:id="@+id/action_inventoryRoomScanFragment_to_inventoryAssetScanFragment"
+            app:destination="@id/inventoryAssetScanFragment"
+            app:popUpTo="@id/inventoryRoomScanFragment"
+            app:popUpToInclusive="false" />
     </fragment>
 
-    <!-- Inventory Session Details -->
+    <!-- 2. Asset Scan (Second step - scan assets in room) -->
     <fragment
-        android:id="@+id/inventorySessionDetailsFragment"
-        android:name="com.etachi.smartassetmanagement.ui.inventory.details.InventorySessionDetailsFragment"
-        android:label="Session Details"
-        tools:layout="@layout/fragment_inventory_session_details">
+        android:id="@+id/inventoryAssetScanFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryAssetScanFragment"
+        android:label="Scan Assets"
+        tools:layout="@layout/fragment_inventory_asset_scan">
         <argument
-            android:name="session"
-            app:argType="com.etachi.smartassetmanagement.domain.model.InventorySession" />
+            android:name="sessionId"
+            app:argType="string" />
     </fragment>
 
-    <!-- Inventory Missing Assets -->
+    <!-- 3. Missing Assets (Third step - results after completion) -->
     <fragment
         android:id="@+id/inventoryMissingAssetsFragment"
         android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryMissingAssetsFragment"
@@ -179,24 +126,84 @@
             app:argType="string" />
     </fragment>
 
-    <!-- Inventory Asset Scan -->
+    <!-- 4. History (List of all inventory sessions) -->
     <fragment
-        android:id="@+id/inventoryAssetScanFragment"
-        android:name="com.etachi.smartassetmanagement.ui.inventory.InventoryAssetScanFragment"
-        android:label="Scan Assets"
-        tools:layout="@layout/fragment_inventory_asset_scan">
+        android:id="@+id/inventoryHistoryFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.history.InventoryHistoryFragment"
+        android:label="Inventory History"
+        tools:layout="@layout/fragment_inventory_history">
+        <action
+            android:id="@+id/action_inventoryHistoryFragment_to_inventorySessionDetailsFragment"
+            app:destination="@id/inventorySessionDetailsFragment" />
+    </fragment>
+
+    <!-- 5. Session Details (View single session details) -->
+    <fragment
+        android:id="@+id/inventorySessionDetailsFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.details.InventorySessionDetailsFragment"
+        android:label="Session Details"
+        tools:layout="@layout/fragment_inventory_session_details">
+        <argument
+            android:name="session"
+            app:argType="com.etachi.smartassetmanagement.domain.model.InventorySession" />
+    </fragment>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SPRINT 3: SCHEDULING -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+
+    <fragment
+        android:id="@+id/scheduledInventoryListFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.scheduled.ScheduledInventoryListFragment"
+        android:label="Scheduled Inventories"
+        tools:layout="@layout/fragment_scheduled_inventory_list">
+        <action
+            android:id="@+id/action_scheduledInventoryListFragment_to_createScheduledInventoryFragment"
+            app:destination="@id/createScheduledInventoryFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createScheduledInventoryFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.scheduled.CreateScheduledInventoryFragment"
+        android:label="Schedule Inventory"
+        tools:layout="@layout/fragment_create_scheduled_inventory" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SPRINT 3: REPORTS -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+
+    <fragment
+        android:id="@+id/inventoryReportFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.report.InventoryReportFragment"
+        android:label="Inventory Report"
+        tools:layout="@layout/fragment_inventory_report">
         <argument
             android:name="sessionId"
             app:argType="string" />
+    </fragment>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SPRINT 3: RELOCATION -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+
+    <fragment
+        android:id="@+id/relocationRequestListFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.relocation.RelocationRequestListFragment"
+        android:label="Relocation Requests"
+        tools:layout="@layout/fragment_relocation_request_list">
         <action
-            android:id="@+id/action_assetScanning_to_missingAssets"
-            app:destination="@id/inventoryMissingAssetsFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/navigation_inventory"
-            app:popUpToInclusive="false" />
+            android:id="@+id/action_relocationRequestListFragment_to_createRelocationRequestFragment"
+            app:destination="@id/createRelocationRequestFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createRelocationRequestFragment"
+        android:name="com.etachi.smartassetmanagement.ui.inventory.relocation.CreateRelocationRequestFragment"
+        android:label="Request Relocation"
+        tools:layout="@layout/fragment_create_relocation_request">
+        <argument
+            android:name="assetId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

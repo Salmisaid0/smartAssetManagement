@@ -26,7 +26,10 @@ object InventorySessionMapper {
                 endTimeMillis = snapshot.getLong("endTimeMillis"),
                 lastUpdatedMillis = snapshot.getLong("lastUpdatedMillis"),
                 createdAtMillis = snapshot.getLong("createdAtMillis"),
-                notes = snapshot.getString("notes") ?: ""
+                notes = snapshot.getString("notes") ?: "",
+                assignedAuditorIds = snapshot.get("assignedAuditorIds") as? List<String> ?: emptyList(),
+                assignedAuditorNames = snapshot.get("assignedAuditorNames") as? List<String> ?: emptyList(),
+                auditorProgress = snapshot.get("auditorProgress") as? Map<String, Int> ?: emptyMap()
             )
         } catch (e: Exception) {
             null
@@ -50,6 +53,9 @@ object InventorySessionMapper {
         "endTimeMillis" to session.endTimeMillis,
         "lastUpdatedMillis" to System.currentTimeMillis(),
         "createdAtMillis" to (session.createdAtMillis ?: System.currentTimeMillis()),
-        "notes" to session.notes
+        "notes" to session.notes,
+        "assignedAuditorIds" to session.assignedAuditorIds,
+        "assignedAuditorNames" to session.assignedAuditorNames,
+        "auditorProgress" to session.auditorProgress
     )
 }

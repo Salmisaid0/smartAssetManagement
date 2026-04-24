@@ -30,12 +30,14 @@ class InventoryHomeFragment : Fragment() {
 
         // Start New Inventory
         binding.btnStartInventory.setOnClickListener {
-            findNavController().navigate(R.id.action_inventoryHome_to_roomScan)
+            // ✅ FIXED: Use correct action ID
+            findNavController().navigate(R.id.action_inventoryHomeFragment_to_inventoryRoomScanFragment)
         }
 
         // View History
         binding.btnViewHistory.setOnClickListener {
-            findNavController().navigate(R.id.action_inventoryHome_to_inventoryHistory)
+            // ✅ FIXED: Use correct action ID
+            findNavController().navigate(R.id.action_inventoryHomeFragment_to_inventoryHistoryFragment)
         }
     }
 

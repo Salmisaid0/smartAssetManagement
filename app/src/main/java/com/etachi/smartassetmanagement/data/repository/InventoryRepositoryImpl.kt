@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Singleton
 
+// ✅ CORRECTION 1: Removed 'abstract' - this is a concrete implementation
+@Singleton
 class InventoryRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : InventoryRepository {
@@ -224,7 +227,11 @@ class InventoryRepositoryImpl @Inject constructor(
                 endTimeMillis = null,
                 lastUpdatedMillis = now,
                 createdAtMillis = now,
-                notes = ""
+                notes = "",
+                // ✅ MULTI-AUDITOR FIELDS
+                assignedAuditorIds = listOf(auditorId),
+                assignedAuditorNames = listOf(auditorName),
+                auditorProgress = emptyMap()
             )
 
             docRef.set(InventorySessionMapper.toFirestoreMap(session)).await()
@@ -260,6 +267,74 @@ class InventoryRepositoryImpl @Inject constructor(
             Timber.e(e, "Error cancelling session")
             Resource.Error(e, "Failed to cancel session")
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // MULTI-AUDITOR SUPPORT (✅ SPRINT 3)
+    // ═══════════════════════════════════════════════════════════════
+
+    override suspend fun addAuditorToSession(
+        sessionId: String,
+        auditorId: String,
+        auditorName: String
+    ): Resource<Unit> {
+        return try {
+            val sessionDoc = sessionsCollection.document(sessionId)
+            val session = getSession(sessionId) ?: return Resource.Error(
+                Exception("Session not found"), "Session not found"
+            )
+
+            val updatedAuditorIds = session.assignedAuditorIds + auditorId
+            val updatedAuditorNames = session.assignedAuditorNames + auditorName
+
+            sessionDoc.update(
+                mapOf(
+                    "assignedAuditorIds" to updatedAuditorIds,
+                    "assignedAuditorNames" to updatedAuditorNames
+                )
+            ).await()
+
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to add auditor")
+            Resource.Error(e, "Failed to add auditor")
+        }
+    }
+
+    override suspend fun getAuditorProgress(sessionId: String): Map<String, Int> {
+        return try {
+            val snapshot = sessionsCollection.document(sessionId)
+                .collection("auditor_progress")
+                .get()
+                .await()
+
+            snapshot.documents.associate { doc ->
+                doc.id to (doc.getLong("scannedCount")?.toInt() ?: 0)
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error getting auditor progress")
+            emptyMap()
+        }
+    }
+
+    override fun observeAuditorProgress(sessionId: String): Flow<Map<String, Int>> = callbackFlow {
+        val listener = sessionsCollection.document(sessionId)
+            .collection("auditor_progress")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Timber.e(error, "Error observing auditor progress")
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val progress = snapshot?.documents?.associate { doc ->
+                    doc.id to (doc.getLong("scannedCount")?.toInt() ?: 0)
+                } ?: emptyMap()
+
+                trySend(progress)
+            }
+
+        awaitClose { listener.remove() }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -324,6 +399,7 @@ class InventoryRepositoryImpl @Inject constructor(
             docRef.set(InventoryScanMapper.toFirestoreMap(enriched)).await()
 
             updateSessionScannedCount(scan.sessionId)
+            updateAuditorProgress(scan.sessionId, scan.auditorId)
 
             Timber.d("Scan created: ${docRef.id}")
             Resource.Success(docRef.id)
@@ -335,6 +411,7 @@ class InventoryRepositoryImpl @Inject constructor(
 
     override suspend fun deleteScan(scanId: String): Resource<Unit> {
         return try {
+            // TODO: Implement delete scan
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error deleting scan")
@@ -393,6 +470,7 @@ class InventoryRepositoryImpl @Inject constructor(
 
             docRef.set(InventoryScanMapper.toFirestoreMap(scan)).await()
             updateSessionScannedCount(sessionId)
+            updateAuditorProgress(sessionId, session.auditorId)
 
             val isInCorrectRoom = assetRoomId == expectedRoomId
 
@@ -421,11 +499,29 @@ class InventoryRepositoryImpl @Inject constructor(
         }
     }
 
+    private suspend fun updateAuditorProgress(sessionId: String, auditorId: String) {
+        try {
+            val progressDoc = sessionsCollection.document(sessionId)
+                .collection("auditor_progress")
+                .document(auditorId)
+
+            val currentProgress = getAuditorProgress(sessionId)
+            val newCount = (currentProgress[auditorId] ?: 0) + 1
+
+            progressDoc.set(mapOf(
+                "auditorId" to auditorId,
+                "scannedCount" to newCount,
+                "lastUpdatedMillis" to System.currentTimeMillis()
+            )).await()
+        } catch (e: Exception) {
+            Timber.e(e, "Error updating auditor progress")
+        }
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // MISSING ASSETS
     // ═══════════════════════════════════════════════════════════════
 
-    // ✅ FIXED: Renamed from getMissingAssets to getMissingAssetsFlow
     override fun getMissingAssetsFlow(sessionId: String): Flow<Resource<List<MissingAsset>>> = callbackFlow {
         trySend(Resource.Loading)
 
@@ -451,7 +547,6 @@ class InventoryRepositoryImpl @Inject constructor(
         awaitClose { listener.remove() }
     }
 
-    // ✅ FIXED: Renamed from getMissingAssets to computeMissingAssets
     override suspend fun computeMissingAssets(sessionId: String): List<MissingAsset> {
         return try {
             val session = getSession(sessionId) ?: return emptyList()
@@ -511,6 +606,7 @@ class InventoryRepositoryImpl @Inject constructor(
         notes: String
     ): Resource<Unit> {
         return try {
+            // TODO: Implement update missing asset status
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error updating missing asset status")

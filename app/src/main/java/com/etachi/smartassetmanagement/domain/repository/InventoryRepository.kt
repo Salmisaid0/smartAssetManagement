@@ -21,6 +21,21 @@ interface InventoryRepository {
 
     suspend fun getActiveSessions(auditorId: String): List<InventorySession>
 
+    // ═══════════════════════════════════════════════════════════════
+// MULTI-AUDITOR SUPPORT (ADD TO INTERFACE)
+// ═══════════════════════════════════════════════════════════════
+
+    suspend fun addAuditorToSession(
+        sessionId: String,
+        auditorId: String,
+        auditorName: String
+    ): Resource<Unit>
+
+    suspend fun getAuditorProgress(sessionId: String): Map<String, Int>
+
+    fun observeAuditorProgress(sessionId: String): Flow<Map<String, Int>>
+
+
     fun observeSession(sessionId: String): Flow<InventorySession?>
 
     suspend fun updateSessionStatus(
@@ -51,9 +66,7 @@ interface InventoryRepository {
 
     suspend fun cancelSession(sessionId: String): Resource<Unit>
 
-    // ═══════════════════════════════════════════════════════════════
-    // SCANS
-    // ═══════════════════════════════════════════════════════════════
+
 
     fun getInventoryScans(sessionId: String): Flow<Resource<List<InventoryScan>>>
 

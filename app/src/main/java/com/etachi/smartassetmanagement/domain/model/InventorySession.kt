@@ -22,7 +22,11 @@ data class InventorySession(
     val endTimeMillis: Long? = null,
     val lastUpdatedMillis: Long? = null,
     val createdAtMillis: Long? = null,
-    val notes: String = ""
+    val notes: String = "",
+    val assignedAuditorIds: List<String> = emptyList(),
+    val assignedAuditorNames: List<String> = emptyList(),
+    val auditorProgress: Map<String, Int> = emptyMap()
+
 ) : Parcelable {
 
     fun getCompletionPercentage(): Int {

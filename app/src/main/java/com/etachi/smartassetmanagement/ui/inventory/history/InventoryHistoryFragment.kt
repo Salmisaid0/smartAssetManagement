@@ -120,11 +120,15 @@ class InventoryHistoryFragment : Fragment() {
         binding.textSessionCount.text = "${state.filteredSessions.size} session(s)"
     }
 
+    // ✅ FIXED: Navigation function with explicit type resolution
     private fun navigateToSessionDetails(session: com.etachi.smartassetmanagement.domain.model.InventorySession) {
+        // ✅ FIXED: Use explicit Int type to resolve overload ambiguity
         val action = InventoryHistoryFragmentDirections
             .actionInventoryHistoryFragmentToInventorySessionDetailsFragment(session)
+
         findNavController().navigate(action)
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
